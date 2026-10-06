@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import type { WebGLRenderer } from 'three'
 
-export type AmbienceKind = 'balloons' | 'fireworks' | 'cosmos' | 'tic-tac-toe'
+export type AmbienceKind = 'balloons' | 'fireworks' | 'cosmos' | 'tic-tac-toe' | 'jungle'
 
 type ThreeRuntime = Pick<typeof import('three'),
   | 'WebGLRenderer' | 'Scene' | 'OrthographicCamera' | 'Group' | 'Mesh' | 'SphereGeometry'
@@ -18,6 +18,7 @@ type ChildMotion = { body: InstanceType<ThreeRuntime['Group']>; arm: InstanceTyp
 type BeachToken = { group: InstanceType<ThreeRuntime['Group']>; hit: InstanceType<ThreeRuntime['Mesh']>; vx: number; vy: number; dragging: boolean; offsetX: number; offsetY: number }
 type BeachBird = { group: InstanceType<ThreeRuntime['Group']>; startX: number; y: number; speed: number; phase: number }
 type BeachFish = { group: InstanceType<ThreeRuntime['Group']>; startX: number; y: number; speed: number; phase: number }
+type JungleMotion = { group: InstanceType<ThreeRuntime['Group']>; x: number; y: number; phase: number; speed: number; kind: 'monkey' | 'bird' }
 
 const balloonColors = [0xe9a0b1, 0xc5a5df, 0xf0c28d, 0xd9867f, 0xa4bfd6]
 const fireworkColors = [0xff4e54, 0xffa14e, 0xc99bff, 0xffdf75, 0x76e2ce, 0xff75b7]
@@ -42,7 +43,7 @@ function mountAmbience(host: HTMLDivElement, kind: AmbienceKind, THREE: ThreeRun
   renderer.domElement.setAttribute('aria-hidden', 'true')
   host.appendChild(renderer.domElement)
 
-  const ambienceColors = kind === 'balloons' ? [0xbda1da, 0xe8837b, 0xf0bb82] : kind === 'fireworks' ? [0xe69183, 0xd8a0de, 0xf4c276] : kind === 'tic-tac-toe' ? [0xffdb9c, 0x8de4df, 0x99caff] : [0xb895e5, 0x83cce7, 0xf1a1b4]
+  const ambienceColors = kind === 'balloons' ? [0xbda1da, 0xe8837b, 0xf0bb82] : kind === 'fireworks' ? [0xe69183, 0xd8a0de, 0xf4c276] : kind === 'tic-tac-toe' ? [0xffdb9c, 0x8de4df, 0x99caff] : kind === 'jungle' ? [0x8ee3ae, 0x57b894, 0xf0cf7c] : [0xb895e5, 0x83cce7, 0xf1a1b4]
   scene.add(new THREE.AmbientLight(0xffe8ed, 1.2))
   const light = new THREE.PointLight(ambienceColors[0], 24, 40)
   light.position.set(-3, 4, 8)
@@ -64,6 +65,7 @@ function mountAmbience(host: HTMLDivElement, kind: AmbienceKind, THREE: ThreeRun
   const beachTokens: BeachToken[] = []
   const beachBirds: BeachBird[] = []
   const beachFish: BeachFish[] = []
+  const jungleActors: JungleMotion[] = []
   const clickableObjects: InstanceType<ThreeRuntime['Mesh']>[] = []
   const replacementTimers: number[] = []
   let disposed = false
@@ -334,6 +336,141 @@ function mountAmbience(host: HTMLDivElement, kind: AmbienceKind, THREE: ThreeRun
     addChild(8.45, clothMats[1], 2.7)
   }
 
+  const addJungleScene = () => {
+    const material = (color: number, roughness = .9) => {
+      const next = new THREE.MeshStandardMaterial({ color, roughness })
+      sharedMaterials.push(next)
+      return next
+    }
+    const sky = new THREE.Mesh(new THREE.BoxGeometry(Math.max(viewWidth * 1.6, 30), 20, .3), new THREE.MeshBasicMaterial({ color: 0x21484a }))
+    sky.position.set(0, 1.4, -14)
+    sharedMaterials.push(sky.material as InstanceType<ThreeRuntime['MeshBasicMaterial']>)
+    scene.add(sky)
+
+    const canopyColors = [0x17473d, 0x205844, 0x2d694d, 0x347454]
+    const trunkMaterial = material(0x614b36)
+    const leafMaterials = canopyColors.map(color => material(color))
+    const undergrowth = new THREE.Mesh(new THREE.BoxGeometry(Math.max(viewWidth * 1.8, 34), 4.2, 1), material(0x294b38))
+    undergrowth.position.set(0, -5.25, -5.5)
+    scene.add(undergrowth)
+
+    const treeXs = [-.48, -.32, .31, .48].map(fraction => fraction * viewWidth)
+    treeXs.forEach((x, index) => {
+      const height = 8 + index % 2 * 1.2
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(.22, .38, height, 9), trunkMaterial)
+      trunk.position.set(x, -1.1, -4.2 - index % 2)
+      trunk.rotation.z = x < 0 ? .06 : -.06
+      scene.add(trunk)
+      for (let cluster = 0; cluster < 4; cluster += 1) {
+        const crown = new THREE.Mesh(new THREE.SphereGeometry(1.8 + (cluster % 2) * .35, 13, 10), leafMaterials[(index + cluster) % leafMaterials.length])
+        crown.scale.set(1.3, .75, .72)
+        crown.position.set(x + (cluster - 1.5) * .72, 2.35 + (cluster % 2) * .65, -4.6 - cluster * .14)
+        scene.add(crown)
+      }
+      const branch = new THREE.Mesh(new THREE.CylinderGeometry(.11, .18, 2.9, 7), trunkMaterial)
+      branch.position.set(x + (x < 0 ? .75 : -.75), .5, -3.75)
+      branch.rotation.z = x < 0 ? -.55 : .55
+      scene.add(branch)
+    })
+
+    const vineMaterial = material(0x3c7952)
+    const vineXs = [-.39, -.2, .2, .39].map(fraction => fraction * viewWidth)
+    vineXs.forEach((x, index) => {
+      const length = 3.3 + index % 2 * 1.2
+      const vine = new THREE.Mesh(new THREE.CylinderGeometry(.025, .045, length, 6), vineMaterial)
+      vine.position.set(x, 4.5 - length / 2, -3.15)
+      scene.add(vine)
+      for (let leafIndex = 0; leafIndex < 5; leafIndex += 1) {
+        const leaf = new THREE.Mesh(new THREE.SphereGeometry(.17, 8, 6), leafMaterials[(leafIndex + index) % leafMaterials.length])
+        leaf.scale.set(1.45, .62, .5)
+        leaf.position.set(x + (leafIndex % 2 ? .2 : -.2), 3.7 - leafIndex * .67, -3.02)
+        leaf.rotation.z = leafIndex % 2 ? -.5 : .5
+        scene.add(leaf)
+      }
+    })
+
+    const flowerPositions = [-.34, -.15, .16, .35].map((fraction, index) => ({ x: fraction * viewWidth, y: -4.45 + (index % 2) * .22, z: -2.3 }))
+    const flowerMaterials = [material(0xffd66f, .55), material(0xff8b81, .55), material(0xc9a6f0, .55)]
+    const flowerCenters: Array<InstanceType<ThreeRuntime['Vector3']>> = []
+    flowerPositions.forEach(({ x, y, z }, index) => {
+      const flower = new THREE.Group()
+      const stem = new THREE.Mesh(new THREE.CylinderGeometry(.025, .04, .72, 6), vineMaterial)
+      stem.position.y = -.34
+      flower.add(stem)
+      for (let petal = 0; petal < 5; petal += 1) {
+        const angle = petal / 5 * Math.PI * 2
+        const bloom = new THREE.Mesh(new THREE.SphereGeometry(.14, 9, 7), flowerMaterials[index % flowerMaterials.length])
+        bloom.position.set(Math.cos(angle) * .18, .08 + Math.sin(angle) * .12, Math.sin(angle) * .06)
+        bloom.scale.set(1, .72, .72)
+        flower.add(bloom)
+      }
+      const center = new THREE.Mesh(new THREE.SphereGeometry(.09, 9, 7), material(0xffe8a2, .5))
+      center.position.set(0, .08, .08)
+      flower.add(center)
+      flower.position.set(x, y, z)
+      scene.add(flower)
+      flowerCenters.push(new THREE.Vector3(x, y + .15, z))
+    })
+
+    const monkeyFur = material(0x9b6843, .8)
+    const monkeyFace = material(0xd7ae83, .82)
+    const monkeyDark = material(0x44352c, .8)
+    const buildMonkey = (x: number, y: number, phase: number) => {
+      const monkey = new THREE.Group()
+      const body = new THREE.Mesh(new THREE.SphereGeometry(.42, 15, 12), monkeyFur)
+      body.scale.set(.78, 1.25, .72)
+      body.position.y = -.18
+      const head = new THREE.Mesh(new THREE.SphereGeometry(.37, 16, 12), monkeyFur)
+      head.position.y = .47
+      const muzzle = new THREE.Mesh(new THREE.SphereGeometry(.21, 12, 10), monkeyFace)
+      muzzle.position.set(.03, .34, .27)
+      const nose = new THREE.Mesh(new THREE.SphereGeometry(.06, 8, 6), monkeyDark)
+      nose.position.set(.03, .41, .46)
+      monkey.add(body, head, muzzle, nose)
+      for (const side of [-1, 1]) {
+        const ear = new THREE.Mesh(new THREE.SphereGeometry(.14, 10, 8), monkeyFace)
+        ear.position.set(side * .34, .49, .06)
+        monkey.add(ear)
+        const arm = new THREE.Mesh(new THREE.CylinderGeometry(.09, .12, .72, 8), monkeyFur)
+        arm.position.set(side * .38, .43, -.05)
+        arm.rotation.z = side * -.66
+        monkey.add(arm)
+        const leg = new THREE.Mesh(new THREE.CylinderGeometry(.11, .14, .55, 8), monkeyFur)
+        leg.position.set(side * .19, -.62, .02)
+        leg.rotation.z = side * .2
+        monkey.add(leg)
+      }
+      const tail = new THREE.Mesh(new THREE.TorusGeometry(.36, .055, 8, 24, Math.PI * 1.55), monkeyFur)
+      tail.position.set(-.42, -.3, -.12)
+      tail.rotation.z = Math.PI * .12
+      monkey.add(tail)
+      monkey.position.set(x, y, -1.6)
+      scene.add(monkey)
+      jungleActors.push({ group: monkey, x, y, phase, speed: .7 + phase * .08, kind: 'monkey' })
+    }
+    buildMonkey(-viewWidth * .29, .45, .6)
+    buildMonkey(viewWidth * .3, -1.05, 2.8)
+
+    const birdMats = [material(0xf3e9d5, .7), material(0xe0f0ed, .72)]
+    flowerCenters.forEach(({ x, y, z }, index) => {
+      const bird = new THREE.Group()
+      const body = new THREE.Mesh(new THREE.SphereGeometry(.19, 12, 9), birdMats[index % birdMats.length])
+      body.scale.set(1.28, .78, .7)
+      const head = new THREE.Mesh(new THREE.SphereGeometry(.13, 11, 8), birdMats[index % birdMats.length])
+      head.position.set(.18, .14, .03)
+      const beak = new THREE.Mesh(new THREE.ConeGeometry(.065, .19, 5), flowerMaterials[index % flowerMaterials.length])
+      beak.position.set(.32, .09, .08)
+      beak.rotation.z = -Math.PI / 2
+      const wing = new THREE.Mesh(new THREE.SphereGeometry(.13, 9, 7), birdMats[index % birdMats.length])
+      wing.position.set(-.04, .1, .08)
+      wing.scale.set(1.15, .45, .5)
+      bird.add(body, head, beak, wing)
+      bird.position.set(x, y + .3, z - .15)
+      scene.add(bird)
+      jungleActors.push({ group: bird, x, y: y + .3, phase: index * 1.7, speed: .9 + index * .12, kind: 'bird' })
+    })
+  }
+
   const addBalloon = (preferredX?: number) => {
     const group = new THREE.Group()
     const tint = balloonColors[Math.floor(Math.random() * balloonColors.length)]
@@ -382,6 +519,7 @@ function mountAmbience(host: HTMLDivElement, kind: AmbienceKind, THREE: ThreeRun
     for (let index = 0; index < 19; index += 1) addBalloon()
   }
   if (kind === 'fireworks') addDiwaliHome()
+  if (kind === 'jungle') addJungleScene()
   if (kind === 'tic-tac-toe') {
     const skyMat = new THREE.MeshBasicMaterial({ color: 0x91cce8 })
     const distantWaterMat = new THREE.MeshBasicMaterial({ color: 0x329eae })
@@ -779,6 +917,19 @@ function mountAmbience(host: HTMLDivElement, kind: AmbienceKind, THREE: ThreeRun
       group.position.x = left + THREE.MathUtils.euclideanModulo(startX - left + elapsed * speed, viewWidth + 3)
       group.position.y = y + Math.sin(elapsed * 1.5 + phase) * .11
       group.rotation.y = Math.sin(elapsed * 2 + phase) * .08
+    })
+    jungleActors.forEach(({ group, x, y, phase, speed, kind: actorKind }) => {
+      const motion = elapsed * speed + phase
+      if (actorKind === 'monkey') {
+        group.position.x = x + Math.sin(motion * .58) * .42
+        group.position.y = y + Math.sin(motion) * .24
+        group.rotation.z = Math.sin(motion * .7) * .14
+      } else {
+        group.position.x = x + Math.sin(motion * .55) * .42
+        group.position.y = y + Math.abs(Math.sin(motion)) * .34
+        group.rotation.z = Math.sin(motion) * .12
+        if (group.children[3]) group.children[3].rotation.z = Math.sin(motion * 5) * .45
+      }
     })
     balloons.forEach(balloon => {
       const currentX = balloon.group.position.x

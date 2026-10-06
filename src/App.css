@@ -523,3 +523,88 @@ button:focus-visible { outline: 2px solid #c4b5fd; outline-offset: 4px; }
 .tic-card:hover { border-color: rgba(134,217,189,.34); background: linear-gradient(145deg, rgba(75,158,132,.12), rgba(255,255,255,.025)); }
 
 @media (max-width: 700px) { .tic-layout { grid-template-columns: 1fr; gap: 12px; }.tic-board { width: min(100%, 480px); aspect-ratio: 1.12; padding: 11px; }.tic-page .tic-stats { min-height: auto; }.tic-page .tic-content { padding-top: 50px; } }
+
+/* Jungle temptation challenge */
+.jungle-page.explore-page { color: #eff2e7; background: #10241e; }
+.jungle-page .explore-glow { background: none; }
+.jungle-page .explore-header { border-color: rgba(223,238,201,.14); }
+.jungle-page .back-button { color: #b7c7b1; }.jungle-page .back-button:hover { color: #f5ffe9; }
+.jungle-page .brand-mark { color: #a9bea4; }.jungle-page .brand-mark svg { color: #a5dc91; }
+.jungle-page .eyebrow { color: #c0df9d; }.jungle-page .game-title { color: #f2f3e9; }.jungle-page .game-title span { color: #d8b677; }
+.jungle-page .explore-intro { color: #c2cbb9; }
+.jungle-page .game-content { max-width: 1120px; }
+.jungle-layout { display: grid; grid-template-columns: minmax(0, 1fr) 230px; gap: 16px; margin-top: 32px; align-items: start; }
+.jungle-challenge { min-width: 0; padding: 17px; border: 1px solid rgba(221,239,195,.17); border-radius: 20px; background: rgba(17,34,28,.72); box-shadow: 0 20px 55px rgba(0,0,0,.24), inset 0 1px rgba(242,255,217,.07); backdrop-filter: blur(6px); }
+.jungle-challenge-top { display: flex; align-items: center; justify-content: space-between; color: #c7d4bd; font-size: 9px; letter-spacing: .13em; }
+.jungle-challenge-top > span { display: inline-flex; align-items: center; gap: 7px; }.jungle-challenge-top svg { color: #d8ba7b; }
+.jungle-challenge-top strong { color: #f4e4b7; font-size: 13px; font-variant-numeric: tabular-nums; letter-spacing: .04em; }
+.jungle-timer { height: 3px; margin-top: 13px; overflow: hidden; border-radius: 99px; background: rgba(225,237,203,.12); }
+.jungle-timer span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #88d69c, #e1c77e); box-shadow: 0 0 13px rgba(178,222,138,.52); transition: width .08s linear; }
+.temptation-well { position: relative; display: grid; min-height: 310px; place-items: center; margin-top: 15px; overflow: hidden; border: 1px solid rgba(220,237,199,.1); border-radius: 15px; background: radial-gradient(ellipse at 50% 55%, rgba(142,177,100,.12), transparent 54%), rgba(7,20,18,.34); }
+.temptation-well::before,.temptation-well::after { position: absolute; width: 240px; height: 240px; border: 1px solid rgba(173,211,140,.07); border-radius: 50%; content: ''; pointer-events: none; }
+.temptation-well::after { width: 340px; height: 340px; }
+.temptation-intro,.temptation-result { position: relative; z-index: 1; display: flex; max-width: 360px; flex-direction: column; align-items: center; padding: 25px 20px; text-align: center; }
+.temptation-spark { display: grid; width: 42px; height: 42px; place-items: center; margin-bottom: 12px; border: 1px solid rgba(206,226,163,.24); border-radius: 50%; color: #e6ce88; background: rgba(189,158,88,.09); box-shadow: 0 0 25px rgba(197,174,105,.12); }
+.temptation-intro strong,.temptation-result strong { color: #f2f1e6; font-size: 19px; font-weight: 550; letter-spacing: -.025em; }
+.temptation-intro > span:not(.temptation-spark),.temptation-result > span:not(.result-glyph) { margin-top: 8px; color: #aebca9; font-size: 11px; line-height: 1.6; }
+.jungle-start { display: inline-flex; min-height: 39px; align-items: center; gap: 9px; margin-top: 20px; padding: 0 16px; border: 1px solid rgba(191,221,155,.29); border-radius: 999px; color: #eff7e6; background: rgba(120,163,99,.19); cursor: pointer; font-size: 11px; transition: border-color .2s ease, background .2s ease, transform .2s ease; }
+.jungle-start:hover { transform: translateY(-1px); border-color: rgba(210,237,173,.54); background: rgba(133,183,105,.28); }
+.jungle-start:focus-visible { outline: 2px solid #c9e99f; outline-offset: 3px; }
+.danger-button { position: relative; z-index: 1; display: flex; width: min(290px, 75%); min-height: 112px; flex-direction: column; align-items: center; justify-content: center; gap: 9px; border: 1px solid rgba(255,229,165,.65); border-radius: 24px; color: #37271a; background: linear-gradient(145deg, #ffd883, #eca653 68%, #db8149); box-shadow: 0 15px 38px rgba(226,145,68,.25), inset 0 2px rgba(255,255,255,.65), inset 0 -5px 12px rgba(161,80,35,.16); cursor: pointer; font-size: 12px; font-weight: 750; letter-spacing: .13em; text-align: center; animation: jungle-button-bait 2.2s ease-in-out infinite; }
+.danger-button::after { position: absolute; inset: -9px; border: 1px solid rgba(255,205,127,.22); border-radius: 30px; content: ''; animation: jungle-button-ring 2.2s ease-out infinite; pointer-events: none; }
+.danger-button-orb { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid rgba(108,62,33,.19); border-radius: 50%; background: rgba(255,241,207,.31); }
+@keyframes jungle-button-bait { 50% { transform: translateY(-3px) scale(1.025); box-shadow: 0 19px 44px rgba(226,145,68,.34), inset 0 2px rgba(255,255,255,.65), inset 0 -5px 12px rgba(161,80,35,.16); } }
+@keyframes jungle-button-ring { 0%,35% { opacity: 0; transform: scale(.96); } 65% { opacity: .65; } 100% { opacity: 0; transform: scale(1.07); } }
+.temptation-result .result-glyph { display: grid; width: 47px; height: 47px; place-items: center; margin-bottom: 12px; border-radius: 50%; font-size: 27px; }
+.result-won { border: 1px solid rgba(173,226,150,.34); color: #d7f3a9; background: rgba(110,171,91,.16); box-shadow: 0 0 28px rgba(157,215,123,.17); }
+.result-lost { border: 1px solid rgba(241,163,111,.34); color: #ffc08f; background: rgba(191,112,66,.15); box-shadow: 0 0 28px rgba(229,142,91,.14); }
+.temptation-result .jungle-start { margin-top: 17px; }
+.temptation-footnote { margin: 13px 0 1px; color: #9cab96; font-size: 10px; text-align: center; }
+.jungle-page .jungle-stats { min-height: 240px; border-color: rgba(221,239,195,.15); background: rgba(20,38,31,.81); box-shadow: 0 12px 36px rgba(0,0,0,.18); }
+.jungle-page .score-heading { color: #afc39f; }.jungle-stat-title { margin: -5px 0 14px; color: #edf1df; font-size: 17px; letter-spacing: -.025em; }
+.jungle-page .score-row { border-color: rgba(221,239,195,.12); color: #b8c5ae; }.jungle-page .score-row strong { color: #eff3e6; }
+.jungle-tip { margin: 14px 0 0; color: #aab9a1; font-size: 10px; line-height: 1.6; }
+.jungle-page .game-disclaimer { color: #a5b09a; }
+.jungle-icon { color: #c1db91; border-color: rgba(193,219,145,.17); background: rgba(193,219,145,.06); }
+.jungle-card:hover { border-color: rgba(193,219,145,.35); background: linear-gradient(145deg, rgba(112,159,79,.13), rgba(255,255,255,.025)); }
+@media (max-width: 700px) { .jungle-layout { grid-template-columns: 1fr; gap: 12px; }.jungle-page .jungle-stats { min-height: auto; }.temptation-well { min-height: 270px; } }
+
+.mole-layout { display: grid; grid-template-columns: minmax(0, 1fr) 230px; gap: 16px; margin-top: 32px; align-items: start; }
+.mole-arcade { min-width: 0; padding: 16px; border: 1px solid rgba(221,239,195,.17); border-radius: 20px; background: rgba(17,34,28,.76); box-shadow: 0 20px 55px rgba(0,0,0,.24), inset 0 1px rgba(242,255,217,.07); backdrop-filter: blur(6px); }
+.mole-scorebar { display: flex; align-items: center; justify-content: space-between; padding: 0 4px; }
+.mole-scorebar > div { display: flex; min-width: 66px; flex-direction: column; gap: 4px; }
+.mole-scorebar > div > span:first-child { color: #aebe9e; font-size: 8px; font-weight: 650; letter-spacing: .15em; }
+.mole-scorebar strong { color: #f0f0df; font-size: 17px; font-weight: 550; font-variant-numeric: tabular-nums; }
+.mole-scorebar small { color: #d9c178; font-size: 9px; }
+.mole-clock { display: flex; align-items: center; justify-content: center; gap: 6px; color: #f0dda4; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.mole-clock svg { color: #d1ba71; }
+.mole-score-pop { animation: mole-score-pop .25s cubic-bezier(.16,.88,.3,1.4); }
+@keyframes mole-score-pop { from { transform: scale(.72); color: #d7e99e; } to { transform: scale(1); } }
+.mole-progress { height: 3px; margin: 12px 4px 15px; overflow: hidden; border-radius: 99px; background: rgba(225,237,203,.12); }
+.mole-progress span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #8bd89c, #e6cf83); box-shadow: 0 0 13px rgba(178,222,138,.52); transition: width .08s linear; }
+.mole-grid { position: relative; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: clamp(8px,1.6vw,17px); padding: clamp(10px,2vw,19px); overflow: hidden; border: 1px solid rgba(221,239,195,.09); border-radius: 16px; background: radial-gradient(ellipse at 50% 35%, rgba(108,142,80,.12), transparent 68%), rgba(10,24,20,.42); }
+.mole-hole { position: relative; display: grid; min-width: 0; aspect-ratio: 1.14; place-items: center; overflow: hidden; border: 0; border-radius: 50%; background: transparent; cursor: crosshair; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.mole-hole:disabled { cursor: default; }
+.mole-hole:focus-visible { outline: 2px solid #d0e99f; outline-offset: -5px; }
+.mole-hole-rim { position: absolute; z-index: 0; inset: 20% 7% 9%; border: 3px solid #76583b; border-radius: 50%; background: linear-gradient(145deg,#9d8056,#654b34 54%,#3c3828); box-shadow: 0 7px 0 #392e25, 0 10px 16px rgba(0,0,0,.27), inset 0 2px 3px rgba(255,231,174,.2); }
+.mole-pit { position: absolute; z-index: 1; right: 16%; bottom: 18%; left: 16%; height: 35%; border-radius: 50%; background: radial-gradient(ellipse at 50% 34%, #050a07 0%, #0d130c 54%, #332d20 100%); box-shadow: inset 0 5px 9px rgba(0,0,0,.92), 0 1px 1px rgba(223,197,139,.21); }
+.mole-monkey { position: absolute; z-index: 2; bottom: 13%; display: grid; width: 84%; height: 88%; place-items: end center; filter: drop-shadow(0 5px 4px rgba(0,0,0,.38)); pointer-events: none; }
+.mole-face { display: block; width: 100%; height: auto; overflow: visible; }
+.mole-hole-active { transform: scale(1.035); filter: drop-shadow(0 0 12px rgba(226,210,138,.2)); }
+.mole-hole-active .mole-pit { box-shadow: inset 0 4px 8px rgba(0,0,0,.82), 0 0 18px rgba(226,192,113,.26); }
+.mole-hole-active .mole-hole-rim { border-color: #b69a64; box-shadow: 0 7px 0 #392e25, 0 10px 18px rgba(0,0,0,.28), 0 0 0 2px rgba(227,204,142,.12), inset 0 2px 3px rgba(255,231,174,.27); }
+.mole-hole-hit::after { position: absolute; z-index: 3; width: 50%; aspect-ratio: 1; border: 2px solid rgba(221,239,160,.65); border-radius: 50%; content: ''; animation: mole-catch-ring .34s ease-out both; pointer-events: none; }
+@keyframes mole-catch-ring { from { opacity: .9; transform: scale(.45); } to { opacity: 0; transform: scale(1.7); } }
+.mole-points { position: absolute; z-index: 4; top: 12%; left: 50%; color: #f6e49e; font-size: 14px; font-weight: 750; text-shadow: 0 2px 9px #111; pointer-events: none; }
+.mole-overlay { position: absolute; z-index: 5; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 18px; border-radius: 15px; background: rgba(9,20,17,.79); backdrop-filter: blur(5px); text-align: center; }
+.mole-overlay-mark { display: grid; width: 42px; height: 42px; place-items: center; margin-bottom: 10px; border: 1px solid rgba(202,228,160,.28); border-radius: 50%; color: #d7e99e; background: rgba(164,199,113,.1); box-shadow: 0 0 25px rgba(164,199,113,.13); }
+.mole-overlay strong { color: #f1f1df; font-size: clamp(15px,2.5vw,20px); font-weight: 550; letter-spacing: -.025em; }
+.mole-overlay > span:not(.mole-overlay-mark) { margin-top: 8px; color: #b6c0ab; font-size: 11px; line-height: 1.55; }
+.mole-overlay button { display: inline-flex; min-height: 39px; align-items: center; gap: 8px; margin-top: 17px; padding: 0 15px; border: 1px solid rgba(191,221,155,.32); border-radius: 999px; color: #eff7e6; background: rgba(120,163,99,.2); cursor: pointer; font-size: 11px; transition: border-color .2s, background .2s, transform .2s; }
+.mole-overlay button:hover { transform: translateY(-1px); border-color: rgba(210,237,173,.55); background: rgba(133,183,105,.3); }
+.mole-overlay button:focus-visible { outline: 2px solid #c9e99f; outline-offset: 3px; }
+.mole-instruction { margin: 12px 2px 0; color: #aebda6; font-size: 10px; text-align: center; }
+.mole-page .game-disclaimer { color: #a5b09a; }
+.mole-page .jungle-stats { min-height: 252px; }
+.mole-page .jungle-tip { margin-top: 15px; }
+@media (max-width: 700px) { .mole-layout { grid-template-columns: 1fr; gap: 12px; }.mole-page .jungle-stats { min-height: auto; }.mole-arcade { padding: 11px; }.mole-grid { gap: 6px; padding: 9px; } }

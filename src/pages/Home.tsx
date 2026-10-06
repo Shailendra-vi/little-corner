@@ -6,7 +6,7 @@ import { getHomeTimeTheme } from '../utils/homeTimeTheme'
 
 const userName = import.meta.env.VITE_USER_NAME || 'Friend'
 
-export default function Home({ onReaction, onMemory, onStars, onTicTacToe, onMonkeys, onFashion, onCat, onHillClimb }: { onReaction: () => void; onMemory: () => void; onStars: () => void; onTicTacToe: () => void; onMonkeys: () => void; onFashion: () => void; onCat: () => void; onHillClimb: () => void }) {
+export default function Home({ onReaction, onMemory, onStars, onTicTacToe, onMonkeys, onFashion, onCat, onHillClimb, onCleanRoom }: { onReaction: () => void; onMemory: () => void; onStars: () => void; onTicTacToe: () => void; onMonkeys: () => void; onFashion: () => void; onCat: () => void; onHillClimb: () => void; onCleanRoom: () => void }) {
   const [timeTheme, setTimeTheme] = useState(getHomeTimeTheme)
 
   useEffect(() => {
@@ -100,6 +100,12 @@ export default function Home({ onReaction, onMemory, onStars, onTicTacToe, onMon
             <span className="game-card-title">Hill Climb: Chaos Edition</span>
             <span className="game-card-description">Steep roads, ridiculous rides, and very questionable landings.</span>
             <span className="game-card-bottom"><span>ENDLESS DRIVE · COLLECT & UPGRADE</span><span className="game-arrow"><ArrowRight size={16} /></span></span>
+          </button>
+          <button className="game-card clean-room-card" type="button" onClick={onCleanRoom}>
+            <span className="game-card-top"><span className="game-icon clean-room-icon"><Sparkles size={18} /></span><span className="game-index">GAME 09</span></span>
+            <span className="game-card-title">Clean Your Room</span>
+            <span className="game-card-description">Sort the chaos before Mom comes back.</span>
+            <span className="game-card-bottom"><span>90 SECONDS · TIDY UP</span><span className="game-arrow"><ArrowRight size={16} /></span></span>
           </button>
         </div>
         <p className="games-note">More little games will find their way here.</p>

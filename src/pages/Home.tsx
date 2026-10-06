@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowDown, ArrowRight, Gamepad2, Sparkles, Star, Zap } from 'lucide-react'
+import { ArrowDown, ArrowRight, CircleDot, Gamepad2, Sparkles, Star, Zap } from 'lucide-react'
 import HomeScene from '../components/HomeScene'
 import { getHomeTimeTheme } from '../utils/homeTimeTheme'
 
 const userName = import.meta.env.VITE_USER_NAME || 'Friend'
 
-export default function Home({ onReaction, onMemory, onStars }: { onReaction: () => void; onMemory: () => void; onStars: () => void }) {
+export default function Home({ onReaction, onMemory, onStars, onTicTacToe }: { onReaction: () => void; onMemory: () => void; onStars: () => void; onTicTacToe: () => void }) {
   const [timeTheme, setTimeTheme] = useState(getHomeTimeTheme)
 
   useEffect(() => {
@@ -70,6 +70,12 @@ export default function Home({ onReaction, onMemory, onStars }: { onReaction: ()
             <span className="game-card-title">Catch the Stars</span>
             <span className="game-card-description">Move the catcher. See how many you can collect.</span>
             <span className="game-card-bottom"><span>30 SECONDS · CATCH & COLLECT</span><span className="game-arrow"><ArrowRight size={16} /></span></span>
+          </button>
+          <button className="game-card tic-card" type="button" onClick={onTicTacToe}>
+            <span className="game-card-top"><span className="game-icon tic-icon"><CircleDot size={18} /></span><span className="game-index">GAME 04</span></span>
+            <span className="game-card-title">Tic-Tac-Toe</span>
+            <span className="game-card-description">Line up three. Play solo or pass it across.</span>
+            <span className="game-card-bottom"><span>ONE QUICK MATCH · X VS O</span><span className="game-arrow"><ArrowRight size={16} /></span></span>
           </button>
         </div>
         <p className="games-note">More little games will find their way here.</p>

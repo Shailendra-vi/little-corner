@@ -4,14 +4,16 @@ import Home from './pages/Home'
 import ReactionTime from './pages/ReactionTime'
 import MemoryCards from './pages/MemoryCards'
 import CatchStars from './pages/CatchStars'
+import TicTacToe from './pages/TicTacToe'
 
-type Page = 'home' | 'reaction' | 'memory' | 'stars'
+type Page = 'home' | 'reaction' | 'memory' | 'stars' | 'tic-tac-toe'
 
 const paths: Record<Page, string> = {
   home: '/',
   reaction: '/games/reaction-time',
   memory: '/games/memory-cards',
   stars: '/games/catch-the-stars',
+  'tic-tac-toe': '/games/tic-tac-toe',
 }
 
 function pageFromPath(pathname: string): Page {
@@ -65,10 +67,11 @@ function App() {
 
   return (
     <div className="app-shell">
-      {page === 'home' && <Home onReaction={() => navigate('reaction')} onMemory={() => navigate('memory')} onStars={() => navigate('stars')} />}
+      {page === 'home' && <Home onReaction={() => navigate('reaction')} onMemory={() => navigate('memory')} onStars={() => navigate('stars')} onTicTacToe={() => navigate('tic-tac-toe')} />}
       {page === 'reaction' && <ReactionTime onBack={backToGames} />}
       {page === 'memory' && <MemoryCards onBack={backToGames} />}
       {page === 'stars' && <CatchStars onBack={backToGames} />}
+      {page === 'tic-tac-toe' && <TicTacToe onBack={backToGames} />}
     </div>
   )
 }

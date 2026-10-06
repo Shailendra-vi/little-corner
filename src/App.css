@@ -473,3 +473,53 @@ button:focus-visible { outline: 2px solid #c4b5fd; outline-offset: 4px; }
 .stars-start-burst { position: absolute; z-index: 0; inset: 0; overflow: hidden; pointer-events: none; }
 .stars-start-burst i { position: absolute; width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: 0; box-shadow: 0 0 8px 2px currentColor, 0 0 23px 5px currentColor; animation: page-sparkle-pop 1.55s cubic-bezier(.16,.78,.25,1) both; }
 @keyframes page-sparkle-pop { 0% { opacity: 0; transform: scale(.1) rotate(0); } 24% { opacity: 1; transform: scale(1.9) rotate(40deg); } 58% { opacity: .9; transform: scale(.8) rotate(90deg); } 100% { opacity: 0; transform: scale(0) rotate(145deg); } }
+
+/* Tic-tac-toe: a quiet moonlit board with floating 3D X/O marks. */
+.tic-page.explore-page { color: #f3eee9; background: #75b8d2; }
+.tic-page, .tic-page * { -webkit-user-select: none; user-select: none; }
+.tic-page .explore-glow { background: none; }
+.tic-page .explore-header { border-color: rgba(30,73,83,.22); }
+.tic-page .back-button { color: #214955; }.tic-page .back-button:hover { color: #102f39; }
+.tic-page .brand-mark { color: #214955; }.tic-page .brand-mark svg { color: #277d71; }
+.tic-page .eyebrow { color: #87d7bf; }.tic-page .game-title { color: #f6eee8; }.tic-page .game-title span { color: #c1a9aa; }
+.tic-page .explore-intro { color: #bfb4b4; }
+.tic-page .game-content > div:first-child { width: fit-content; max-width: 100%; padding: 17px 21px; border: 1px solid rgba(235,248,244,.18); border-radius: 18px; background: rgba(19,39,50,.66); box-shadow: 0 12px 34px rgba(14,45,56,.16); backdrop-filter: blur(7px); }
+.tic-mode-picker { display: flex; width: fit-content; max-width: 100%; align-items: center; gap: 5px; margin-top: 19px; padding: 5px; border: 1px solid rgba(222,237,231,.14); border-radius: 999px; background: rgba(18,29,34,.67); box-shadow: 0 8px 24px rgba(15,39,49,.13); }
+.tic-mode-picker > span { padding: 0 9px 0 7px; color: #c0d3d1; font-size: 8px; font-weight: 600; letter-spacing: .13em; }
+.tic-mode-picker button { min-height: 32px; padding: 0 12px; border: 1px solid transparent; border-radius: 999px; color: #bfcecc; background: transparent; cursor: pointer; font-size: 10px; transition: color .2s, background .2s, border-color .2s; }
+.tic-mode-picker button:hover { color: #fff; background: rgba(255,255,255,.07); }
+.tic-mode-picker button.is-selected { border-color: rgba(144,220,192,.29); color: #edfff7; background: rgba(84,155,133,.25); }
+.tic-mode-picker button:focus-visible { outline: 2px solid #a5e7ce; outline-offset: 2px; }
+.tic-mode-picker small { margin-left: 5px; color: #96dfbf; font-size: 7px; letter-spacing: .08em; }
+.tic-beach-hint { margin: 9px 0 0; color: #eaf8f3; font-size: 10px; letter-spacing: .025em; text-shadow: 0 1px 8px rgba(22,62,70,.55); }
+.tic-mark-small { font-size: 17px; font-weight: 700; letter-spacing: -.1em; color: #f2a582; }
+.tic-layout { display: grid; grid-template-columns: minmax(0, 1fr) 230px; gap: 16px; margin-top: 34px; align-items: start; }
+.tic-board-wrap { min-width: 0; }
+.tic-board { position: relative; display: grid; width: min(100%, 560px); aspect-ratio: 1.3; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: 0; margin: 0 auto; padding: 16px; overflow: hidden; border: 1px solid rgba(214,229,220,.14); border-radius: 22px; background: radial-gradient(ellipse at 50% 48%, rgba(91,143,133,.1), transparent 67%), rgba(24,28,32,.79); box-shadow: 0 24px 70px rgba(0,0,0,.24), inset 0 1px rgba(255,255,255,.06); }
+.tic-cell { position: relative; display: grid; min-width: 0; min-height: 0; place-items: center; border: 0; border-right: 1px solid rgba(203,220,208,.18); border-bottom: 1px solid rgba(203,220,208,.18); color: #f2eee7; background: transparent; cursor: pointer; transition: background .2s ease, box-shadow .2s ease; }
+.tic-cell:nth-child(3n) { border-right: 0; }.tic-cell:nth-child(n+7) { border-bottom: 0; }
+.tic-cell:not(:disabled):hover { background: rgba(112,195,170,.08); box-shadow: inset 0 0 28px rgba(112,195,170,.06); }
+.tic-cell:focus-visible { z-index: 1; outline: 2px solid #89dec2; outline-offset: -5px; border-radius: 9px; }
+.tic-cell span { display: block; font-size: clamp(54px, 10vw, 96px); font-weight: 350; line-height: 1; animation: tic-mark-in .28s cubic-bezier(.16,.88,.3,1.3) both; }
+.tic-cell-x span { color: #ffac83; text-shadow: 0 0 22px rgba(255,142,101,.38); }
+.tic-cell-o span { color: #88dfc2; text-shadow: 0 0 22px rgba(102,220,185,.32); }
+@keyframes tic-mark-in { from { opacity: 0; transform: scale(.45) rotate(-18deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
+.tic-overlay { position: absolute; z-index: 2; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; color: #f7eee8; background: rgba(18,19,24,.72); backdrop-filter: blur(5px); text-align: center; }
+.tic-orbit-mark { margin-bottom: 4px; color: #9be0c8; font-size: 34px; font-weight: 500; letter-spacing: -.15em; text-shadow: 0 0 22px rgba(116,220,189,.48); }
+.tic-overlay strong { font-size: 19px; font-weight: 550; letter-spacing: -.025em; }
+.tic-overlay > span:not(.tic-orbit-mark) { color: #b9b4b5; font-size: 11px; }
+.tic-overlay button { display: inline-flex; min-height: 39px; align-items: center; gap: 8px; margin-top: 9px; padding: 0 16px; border: 1px solid rgba(146,221,194,.34); border-radius: 999px; color: #eafff6; background: rgba(91,173,145,.16); cursor: pointer; font-size: 11px; transition: border-color .2s, background .2s, transform .2s; }
+.tic-overlay button:hover { transform: translateY(-1px); border-color: rgba(160,239,209,.62); background: rgba(91,173,145,.26); }
+.tic-overlay button:focus-visible { outline: 2px solid #9be0c8; outline-offset: 3px; }
+.tic-status { display: flex; min-height: 44px; align-items: center; gap: 9px; width: min(100%,560px); margin: 8px auto 0; padding: 0 5px; color: #d9d1cf; font-size: 12px; }
+.turn-orb { width: 8px; height: 8px; border-radius: 50%; }.turn-x { background: #ffac83; box-shadow: 0 0 12px rgba(255,172,131,.7); }.turn-o { background: #88dfc2; box-shadow: 0 0 12px rgba(136,223,194,.7); }
+.tic-move-count { margin-left: auto; color: #898b91; font-size: 10px; font-variant-numeric: tabular-nums; letter-spacing: .12em; }
+.tic-page .tic-stats { min-height: 265px; border-color: rgba(215,231,220,.13); background: rgba(31,34,37,.78); box-shadow: 0 12px 36px rgba(0,0,0,.15); }
+.tic-page .score-heading { color: #9baca5; }.tic-stat-main { margin: -5px 0 15px; color: #ecf0e9; font-size: 17px; letter-spacing: -.025em; }
+.tic-page .score-row { border-color: rgba(215,231,220,.11); color: #b1b4af; }.tic-page .score-row strong { color: #eff2ed; }
+.tic-tip { margin: 15px 0 0; color: #a4aba5; font-size: 10px; line-height: 1.6; }
+.tic-page .game-disclaimer { color: #edf7f4; text-shadow: 0 1px 8px rgba(22,62,70,.5); }
+.tic-icon { color: #86d9bd; border-color: rgba(134,217,189,.15); background: rgba(134,217,189,.055); }
+.tic-card:hover { border-color: rgba(134,217,189,.34); background: linear-gradient(145deg, rgba(75,158,132,.12), rgba(255,255,255,.025)); }
+
+@media (max-width: 700px) { .tic-layout { grid-template-columns: 1fr; gap: 12px; }.tic-board { width: min(100%, 480px); aspect-ratio: 1.12; padding: 11px; }.tic-page .tic-stats { min-height: auto; }.tic-page .tic-content { padding-top: 50px; } }

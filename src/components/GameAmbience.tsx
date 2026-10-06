@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import type { WebGLRenderer } from 'three'
 
-export type AmbienceKind = 'balloons' | 'fireworks' | 'cosmos'
+export type AmbienceKind = 'balloons' | 'fireworks' | 'cosmos' | 'tic-tac-toe'
 
 type ThreeRuntime = Pick<typeof import('three'),
   | 'WebGLRenderer' | 'Scene' | 'OrthographicCamera' | 'Group' | 'Mesh' | 'SphereGeometry'
@@ -15,6 +15,9 @@ type Particle = { mesh: InstanceType<ThreeRuntime['Mesh']>; velocity: InstanceTy
 type Rocket = { mesh: InstanceType<ThreeRuntime['Mesh']>; from: InstanceType<ThreeRuntime['Vector3']>; to: InstanceType<ThreeRuntime['Vector3']>; elapsed: number; material: InstanceType<ThreeRuntime['MeshStandardMaterial']> }
 type DiyaFlame = { mesh: InstanceType<ThreeRuntime['Mesh']>; phase: number }
 type ChildMotion = { body: InstanceType<ThreeRuntime['Group']>; arm: InstanceType<ThreeRuntime['Group']>; spark: InstanceType<ThreeRuntime['Mesh']>; phase: number }
+type BeachToken = { group: InstanceType<ThreeRuntime['Group']>; hit: InstanceType<ThreeRuntime['Mesh']>; vx: number; vy: number; dragging: boolean; offsetX: number; offsetY: number }
+type BeachBird = { group: InstanceType<ThreeRuntime['Group']>; startX: number; y: number; speed: number; phase: number }
+type BeachFish = { group: InstanceType<ThreeRuntime['Group']>; startX: number; y: number; speed: number; phase: number }
 
 const balloonColors = [0xe9a0b1, 0xc5a5df, 0xf0c28d, 0xd9867f, 0xa4bfd6]
 const fireworkColors = [0xff4e54, 0xffa14e, 0xc99bff, 0xffdf75, 0x76e2ce, 0xff75b7]
@@ -39,7 +42,7 @@ function mountAmbience(host: HTMLDivElement, kind: AmbienceKind, THREE: ThreeRun
   renderer.domElement.setAttribute('aria-hidden', 'true')
   host.appendChild(renderer.domElement)
 
-  const ambienceColors = kind === 'balloons' ? [0xbda1da, 0xe8837b, 0xf0bb82] : kind === 'fireworks' ? [0xe69183, 0xd8a0de, 0xf4c276] : [0xb895e5, 0x83cce7, 0xf1a1b4]
+  const ambienceColors = kind === 'balloons' ? [0xbda1da, 0xe8837b, 0xf0bb82] : kind === 'fireworks' ? [0xe69183, 0xd8a0de, 0xf4c276] : kind === 'tic-tac-toe' ? [0xffdb9c, 0x8de4df, 0x99caff] : [0xb895e5, 0x83cce7, 0xf1a1b4]
   scene.add(new THREE.AmbientLight(0xffe8ed, 1.2))
   const light = new THREE.PointLight(ambienceColors[0], 24, 40)
   light.position.set(-3, 4, 8)
@@ -58,11 +61,15 @@ function mountAmbience(host: HTMLDivElement, kind: AmbienceKind, THREE: ThreeRun
   const rockets: Rocket[] = []
   const diyaFlames: DiyaFlame[] = []
   const children: ChildMotion[] = []
+  const beachTokens: BeachToken[] = []
+  const beachBirds: BeachBird[] = []
+  const beachFish: BeachFish[] = []
   const clickableObjects: InstanceType<ThreeRuntime['Mesh']>[] = []
   const replacementTimers: number[] = []
   let disposed = false
   let audioContext: AudioContext | null = null
   let draggedBalloon: Balloon | null = null
+  let draggedBeachToken: BeachToken | null = null
   let dragPointerId: number | null = null
   let dragOffsetX = 0
   let dragOffsetY = 0
@@ -264,7 +271,7 @@ function mountAmbience(host: HTMLDivElement, kind: AmbienceKind, THREE: ThreeRun
     const floor = new THREE.Mesh(new THREE.BoxGeometry(Math.max(viewWidth * 1.2, 18), .22, 9), material(0x32262d))
     floor.position.set(0, -5.77, -4.2)
     scene.add(floor)
-    for (let index = 0; index < 11; index += 1) {
+    for (let index = 0; index < 12; index += 1) {
       const seam = new THREE.Mesh(new THREE.BoxGeometry(.018, .012, 8.6), material(0x78605a))
       seam.position.set(-8 + index * 1.6, -5.645, -4.1)
       scene.add(seam)
@@ -375,6 +382,177 @@ function mountAmbience(host: HTMLDivElement, kind: AmbienceKind, THREE: ThreeRun
     for (let index = 0; index < 19; index += 1) addBalloon()
   }
   if (kind === 'fireworks') addDiwaliHome()
+  if (kind === 'tic-tac-toe') {
+    const skyMat = new THREE.MeshBasicMaterial({ color: 0x91cce8 })
+    const distantWaterMat = new THREE.MeshBasicMaterial({ color: 0x329eae })
+    const waterMat = new THREE.MeshStandardMaterial({ color: 0x197f94, roughness: .32, metalness: .08, emissive: 0x0b5264, emissiveIntensity: .2 })
+    const sandMat = new THREE.MeshStandardMaterial({ color: 0xd3ad77, roughness: 1 })
+    const shorelineMat = new THREE.MeshBasicMaterial({ color: 0xffe2a9 })
+    const sunMat = new THREE.MeshBasicMaterial({ color: 0xffe2a1 })
+    const cloudMat = new THREE.MeshBasicMaterial({ color: 0xf4f5e8, transparent: true, opacity: .78 })
+    const palmMat = new THREE.MeshStandardMaterial({ color: 0x77543b, roughness: .95 })
+    const leafMat = new THREE.MeshStandardMaterial({ color: 0x39725a, roughness: .88 })
+    const birdMat = new THREE.MeshBasicMaterial({ color: 0xffffff })
+    const fishMats = [new THREE.MeshStandardMaterial({ color: 0xffa56f, roughness: .45 }), new THREE.MeshStandardMaterial({ color: 0x74d6d2, roughness: .38 }), new THREE.MeshStandardMaterial({ color: 0xffd47b, roughness: .5 })]
+    const turtleMat = new THREE.MeshStandardMaterial({ color: 0x538b68, roughness: .75 })
+    const turtleShellMat = new THREE.MeshStandardMaterial({ color: 0x335f50, roughness: .76 })
+    const eyeMat = new THREE.MeshBasicMaterial({ color: 0x142d34 })
+    const shellMats = [new THREE.MeshStandardMaterial({ color: 0xf3d6ae, roughness: .8 }), new THREE.MeshStandardMaterial({ color: 0xe9b9a2, roughness: .72 })]
+    const xMaterial = new THREE.MeshStandardMaterial({ color: 0xffad78, emissive: 0xa94725, emissiveIntensity: .3, roughness: .34, metalness: .12 })
+    const oMaterial = new THREE.MeshStandardMaterial({ color: 0x8be1ce, emissive: 0x176957, emissiveIntensity: .3, roughness: .25, metalness: .18 })
+    const invisibleMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
+    sharedMaterials.push(skyMat, distantWaterMat, waterMat, sandMat, shorelineMat, sunMat, cloudMat, palmMat, leafMat, birdMat, ...fishMats, turtleMat, turtleShellMat, eyeMat, ...shellMats, xMaterial, oMaterial, invisibleMat)
+
+    const sky = new THREE.Mesh(new THREE.BoxGeometry(70, 18, .2), skyMat)
+    sky.position.set(0, 2.2, -14)
+    scene.add(sky)
+    const sun = new THREE.Mesh(new THREE.SphereGeometry(.68, 32, 24), sunMat)
+    sun.position.set(viewWidth * .31, 3.2, -9)
+    scene.add(sun)
+    for (const [x, y, size] of [[-4.2, 4.25, 1], [-3.35, 4.38, .75], [4.7, 4.75, .9], [5.42, 4.88, .64]] as const) {
+      const cloud = new THREE.Group()
+      for (const [dx, dy, scale] of [[0, 0, 1], [.38, .12, .78], [-.34, .08, .72], [.08, .22, .8]] as const) {
+        const puff = new THREE.Mesh(new THREE.SphereGeometry(size * .34 * scale, 14, 10), cloudMat)
+        puff.position.set(dx * size, dy * size, 0)
+        puff.scale.y = .56
+        cloud.add(puff)
+      }
+      cloud.position.set(x, y, -10)
+      scene.add(cloud)
+    }
+    const sea = new THREE.Mesh(new THREE.BoxGeometry(70, 5.2, .5), distantWaterMat)
+    sea.position.set(0, -1.9, -10)
+    const water = new THREE.Mesh(new THREE.BoxGeometry(70, 4.9, .5), waterMat)
+    water.position.set(0, -2.1, -9)
+    scene.add(sea, water)
+    for (let index = 0; index < 17; index += 1) {
+      const glintMat = new THREE.MeshBasicMaterial({ color: index % 3 === 0 ? 0xd8fff0 : 0xa4e4e5, transparent: true, opacity: .14 + Math.random() * .2 })
+      sharedMaterials.push(glintMat)
+      const glint = new THREE.Mesh(new THREE.BoxGeometry(.38 + Math.random() * 1.35, .018, .03), glintMat)
+      glint.position.set((Math.random() - .5) * Math.max(viewWidth * 1.5, 20), -1 + Math.random() * 2.25, -8.6)
+      scene.add(glint)
+    }
+    const shore = new THREE.Mesh(new THREE.BoxGeometry(70, .23, .7), shorelineMat)
+    shore.position.set(0, -4.35, -7.8)
+    const sand = new THREE.Mesh(new THREE.BoxGeometry(70, 4.2, 1.2), sandMat)
+    sand.position.set(0, -6.45, -7.6)
+    scene.add(shore, sand)
+
+    for (const side of [-1, 1]) {
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(.16, .28, 4.4, 8), palmMat)
+      trunk.position.set(side * viewWidth * .43, -3.35, -3.1)
+      trunk.rotation.z = side * -.2
+      scene.add(trunk)
+      const crown = new THREE.Group()
+      crown.position.set(side * viewWidth * .43 - side * .43, -1.18, -3.1)
+      for (let leaf = 0; leaf < 10; leaf += 1) {
+        const frond = new THREE.Mesh(new THREE.ConeGeometry(.2, 2.7, 6), leafMat)
+        const angle = leaf / 10 * Math.PI * 2
+        frond.position.set(Math.cos(angle) * .62, Math.sin(angle) * .25, Math.sin(angle) * .16)
+        frond.rotation.z = angle - Math.PI / 2
+        frond.rotation.x = Math.sin(angle) * .18
+        crown.add(frond)
+      }
+      for (let nut = 0; nut < 3; nut += 1) {
+        const coconut = new THREE.Mesh(new THREE.SphereGeometry(.13, 9, 7), palmMat)
+        coconut.position.set((nut - 1) * .15, -.07, .14)
+        crown.add(coconut)
+      }
+      scene.add(crown)
+    }
+
+    for (let index = 0; index < 7; index += 1) {
+      const bird = new THREE.Group()
+      const leftWing = new THREE.Mesh(new THREE.BoxGeometry(.47, .045, .035), birdMat)
+      const rightWing = new THREE.Mesh(new THREE.BoxGeometry(.47, .045, .035), birdMat)
+      leftWing.position.x = -.2
+      rightWing.position.x = .2
+      leftWing.rotation.z = .34
+      rightWing.rotation.z = -.34
+      bird.add(leftWing, rightWing)
+      const y = 2.45 + (index % 4) * .7
+      const startX = -viewWidth / 2 - index * 1.3
+      bird.position.set(startX, y, -5.7)
+      scene.add(bird)
+      beachBirds.push({ group: bird, startX, y, speed: .38 + (index % 3) * .11, phase: index * 1.2 })
+    }
+
+    for (let index = 0; index < 6; index += 1) {
+      const fish = new THREE.Group()
+      const body = new THREE.Mesh(new THREE.SphereGeometry(.27, 14, 10), fishMats[index % fishMats.length])
+      body.scale.set(1.35, .72, .68)
+      const tail = new THREE.Mesh(new THREE.ConeGeometry(.19, .36, 6), fishMats[index % fishMats.length])
+      tail.position.x = -.43
+      tail.rotation.z = Math.PI / 2
+      const fin = new THREE.Mesh(new THREE.ConeGeometry(.12, .23, 5), fishMats[index % fishMats.length])
+      fin.position.set(0, .18, 0)
+      fin.rotation.z = Math.PI
+      const eye = new THREE.Mesh(new THREE.SphereGeometry(.035, 8, 6), eyeMat)
+      eye.position.set(.31, .04, .16)
+      fish.add(body, tail, fin, eye)
+      const y = -1.15 - (index % 4) * .62
+      const startX = -viewWidth / 2 - (index % 3) * 2.5
+      fish.position.set(startX, y, -8.28)
+      scene.add(fish)
+      beachFish.push({ group: fish, startX, y, speed: .42 + (index % 3) * .17, phase: index * 1.5 })
+    }
+
+    const turtle = new THREE.Group()
+    const turtleBody = new THREE.Mesh(new THREE.SphereGeometry(.3, 14, 10), turtleMat)
+    turtleBody.scale.set(1.25, .48, .74)
+    const turtleShell = new THREE.Mesh(new THREE.SphereGeometry(.38, 14, 10), turtleShellMat)
+    turtleShell.scale.set(1.1, .7, .88)
+    turtleShell.position.z = -.04
+    const turtleHead = new THREE.Mesh(new THREE.SphereGeometry(.15, 10, 8), turtleMat)
+    turtleHead.position.x = .43
+    turtleHead.position.z = .06
+    const turtleEye = new THREE.Mesh(new THREE.SphereGeometry(.025, 6, 5), eyeMat)
+    turtleEye.position.set(.08, .07, .12)
+    turtleHead.add(turtleEye)
+    for (const legX of [-.23, .22]) for (const legY of [-.16, .16]) {
+      const leg = new THREE.Mesh(new THREE.SphereGeometry(.1, 9, 7), turtleMat)
+      leg.position.set(legX, legY, .05)
+      leg.scale.set(1.2, .6, .65)
+      turtle.add(leg)
+    }
+    turtle.add(turtleBody, turtleShell, turtleHead)
+    turtle.position.set(viewWidth * .2, -2.82, -8.24)
+    scene.add(turtle)
+    beachFish.push({ group: turtle, startX: viewWidth * .2, y: -2.82, speed: .19, phase: 4.4 })
+
+    for (let index = 0; index < 16; index += 1) {
+      const shell = new THREE.Mesh(new THREE.SphereGeometry(.12 + Math.random() * .07, 10, 8), shellMats[index % 2])
+      shell.scale.set(1.3, .45, .72)
+      shell.position.set((Math.random() - .5) * Math.min(viewWidth * .9, 12), -5.42 + Math.random() * .38, -5.8 + Math.random() * .45)
+      scene.add(shell)
+    }
+
+    for (let index = 0; index < 11; index += 1) {
+      const group = new THREE.Group()
+      const isX = index % 2 === 0
+      const material = isX ? xMaterial : oMaterial
+      if (isX) {
+        const slashA = new THREE.Mesh(new THREE.BoxGeometry(.16, .88, .2), material)
+        const slashB = new THREE.Mesh(new THREE.BoxGeometry(.16, .88, .2), material)
+        slashA.rotation.z = Math.PI / 4
+        slashB.rotation.z = -Math.PI / 4
+        group.add(slashA, slashB)
+      } else {
+        group.add(new THREE.Mesh(new THREE.TorusGeometry(.34, .09, 12, 32), material))
+      }
+      const hit = new THREE.Mesh(new THREE.SphereGeometry(.48, 12, 10), invisibleMat)
+      hit.position.z = .08
+      hit.userData.beachToken = true
+      group.add(hit)
+      const x = -Math.min(viewWidth * .39, 5.6) + index * (Math.min(viewWidth * .78, 11.2) / 15)
+      group.position.set(x, -5.06 + Math.random() * .12, -.2)
+      group.rotation.z = (Math.random() - .5) * .4
+      scene.add(group)
+      const token: BeachToken = { group, hit, vx: 0, vy: 0, dragging: false, offsetX: 0, offsetY: 0 }
+      beachTokens.push(token)
+      clickableObjects.push(hit)
+    }
+  }
 
   const pointer = new THREE.Vector2()
   const raycaster = new THREE.Raycaster()
@@ -400,13 +578,19 @@ function mountAmbience(host: HTMLDivElement, kind: AmbienceKind, THREE: ThreeRun
   const isInteractiveTarget = (target: EventTarget | null) => target instanceof Element && Boolean(target.closest('button, a, input, [role="button"], [data-game-surface]'))
 
   const handlePointerMove = (event: PointerEvent) => {
-    if (kind !== 'balloons') return
+    if (kind !== 'balloons' && kind !== 'tic-tac-toe') return
     eventPoint(event)
     if (draggedBalloon && dragPointerId === event.pointerId) {
       if (Math.hypot(event.clientX - dragStartClientX, event.clientY - dragStartClientY) > 7) hasDragged = true
       const margin = .55
       draggedBalloon.dragX = THREE.MathUtils.clamp(pointerWorldX + dragOffsetX, -viewWidth / 2 + margin, viewWidth / 2 - margin)
       draggedBalloon.dragY = THREE.MathUtils.clamp(pointerWorldY + dragOffsetY, -viewHeight / 2 + margin, viewHeight / 2 - margin)
+    } else if (draggedBeachToken && dragPointerId === event.pointerId) {
+      draggedBeachToken.group.position.x = THREE.MathUtils.clamp(pointerWorldX + draggedBeachToken.offsetX, -viewWidth / 2 + .5, viewWidth / 2 - .5)
+      draggedBeachToken.group.position.y = THREE.MathUtils.clamp(pointerWorldY + draggedBeachToken.offsetY, -viewHeight / 2 + .55, viewHeight / 2 - .55)
+      draggedBeachToken.group.position.z = 1.2
+      draggedBeachToken.vx = 0
+      draggedBeachToken.vy = 0
     }
   }
 
@@ -467,6 +651,17 @@ function mountAmbience(host: HTMLDivElement, kind: AmbienceKind, THREE: ThreeRun
       balloon.dragY = balloon.group.position.y
       balloon.dragging = true
       hasDragged = false
+    } else if (kind === 'tic-tac-toe') {
+      const tokenHit = ray.intersectObjects(clickableObjects, false)[0]?.object
+      const token = beachTokens.find(item => item.hit === tokenHit)
+      if (!token) return
+      draggedBeachToken = token
+      dragPointerId = event.pointerId
+      token.dragging = true
+      token.offsetX = token.group.position.x - pointerWorldX
+      token.offsetY = token.group.position.y - pointerWorldY
+      token.vx = 0
+      token.vy = 0
     } else if (kind === 'fireworks') {
       ensureAudioContext()
       const material = new THREE.MeshStandardMaterial({ color: 0xff8d70, emissive: 0xff4d5d, emissiveIntensity: 1.8 })
@@ -477,12 +672,22 @@ function mountAmbience(host: HTMLDivElement, kind: AmbienceKind, THREE: ThreeRun
       rocket.rotation.z = -.12
       scene.add(rocket)
       rockets.push({ mesh: rocket, from, to, elapsed: 0, material })
-    } else {
+    } else if (kind === 'cosmos') {
       addBurst(x, y, 1, cosmicColors, 28)
     }
   }
 
   const handlePointerUp = (event: PointerEvent) => {
+    if (draggedBeachToken && dragPointerId === event.pointerId) {
+      const token = draggedBeachToken
+      token.dragging = false
+      token.group.position.z = -.2
+      token.vx = pointerVelocityX * .42
+      token.vy = Math.max(2.55, pointerVelocityY * .5)
+      draggedBeachToken = null
+      dragPointerId = null
+      return
+    }
     if (!draggedBalloon || dragPointerId !== event.pointerId) return
     const balloon = draggedBalloon
     balloon.dragging = false
@@ -498,7 +703,7 @@ function mountAmbience(host: HTMLDivElement, kind: AmbienceKind, THREE: ThreeRun
   }
 
   const handlePointerOut = (event: PointerEvent) => {
-    if (event.relatedTarget === null && !draggedBalloon) {
+    if (event.relatedTarget === null && !draggedBalloon && !draggedBeachToken) {
       pointerActive = false
       pointerVelocityX = 0
       pointerVelocityY = 0
@@ -537,6 +742,43 @@ function mountAmbience(host: HTMLDivElement, kind: AmbienceKind, THREE: ThreeRun
       arm.rotation.z = Math.sin(elapsed * 2.6 + phase) * .12 + (phase < 1 ? -.55 : .55)
       const flicker = .78 + (Math.sin(elapsed * 15 + phase) + 1) * .42
       spark.scale.setScalar(flicker)
+    })
+    beachTokens.forEach(token => {
+      if (token.dragging) return
+      token.vy -= 7.2 * delta
+      token.group.position.x += token.vx * delta
+      token.group.position.y += token.vy * delta
+      const floorY = -5.08
+      if (token.group.position.y < floorY) {
+        token.group.position.y = floorY
+        if (Math.abs(token.vy) > .62) token.vy = Math.abs(token.vy) * .38
+        else token.vy = 0
+        token.vx *= .68
+      }
+      const edge = viewWidth / 2 - .65
+      if (token.group.position.x < -edge || token.group.position.x > edge) {
+        token.group.position.x = THREE.MathUtils.clamp(token.group.position.x, -edge, edge)
+        token.vx *= -.52
+      }
+      if (token.group.position.y > viewHeight / 2 - .65) {
+        token.group.position.y = viewHeight / 2 - .65
+        token.vy = -Math.abs(token.vy) * .42
+      }
+      token.vx *= Math.max(0, 1 - delta * .55)
+      if (token.vy === 0) token.vx *= Math.max(0, 1 - delta * 3.8)
+    })
+    beachBirds.forEach(({ group, startX, y, speed, phase }) => {
+      const left = -viewWidth / 2 - 1
+      group.position.x = left + THREE.MathUtils.euclideanModulo(startX - left + elapsed * speed, viewWidth + 2)
+      group.position.y = y + Math.sin(elapsed * 2.1 + phase) * .08
+      group.children[0].rotation.z = .34 + Math.sin(elapsed * 5 + phase) * .12
+      group.children[1].rotation.z = -.34 - Math.sin(elapsed * 5 + phase) * .12
+    })
+    beachFish.forEach(({ group, startX, y, speed, phase }) => {
+      const left = -viewWidth / 2 - 1.5
+      group.position.x = left + THREE.MathUtils.euclideanModulo(startX - left + elapsed * speed, viewWidth + 3)
+      group.position.y = y + Math.sin(elapsed * 1.5 + phase) * .11
+      group.rotation.y = Math.sin(elapsed * 2 + phase) * .08
     })
     balloons.forEach(balloon => {
       const currentX = balloon.group.position.x

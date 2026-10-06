@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowDown, ArrowRight, CircleDot, Gamepad2, Gem, Leaf, Sparkles, Star, Zap } from 'lucide-react'
+import { ArrowDown, ArrowRight, CircleDot, Gamepad2, Gem, Leaf, PawPrint, Sparkles, Star, Zap } from 'lucide-react'
 import HomeScene from '../components/HomeScene'
 import { getHomeTimeTheme } from '../utils/homeTimeTheme'
 
 const userName = import.meta.env.VITE_USER_NAME || 'Friend'
 
-export default function Home({ onReaction, onMemory, onStars, onTicTacToe, onMonkeys, onFashion }: { onReaction: () => void; onMemory: () => void; onStars: () => void; onTicTacToe: () => void; onMonkeys: () => void; onFashion: () => void }) {
+export default function Home({ onReaction, onMemory, onStars, onTicTacToe, onMonkeys, onFashion, onCat }: { onReaction: () => void; onMemory: () => void; onStars: () => void; onTicTacToe: () => void; onMonkeys: () => void; onFashion: () => void; onCat: () => void }) {
   const [timeTheme, setTimeTheme] = useState(getHomeTimeTheme)
 
   useEffect(() => {
@@ -88,6 +88,12 @@ export default function Home({ onReaction, onMemory, onStars, onTicTacToe, onMon
             <span className="game-card-title">Fashion Disaster</span>
             <span className="game-card-description">Catch the right pieces. Style the event. Face the verdict.</span>
             <span className="game-card-bottom"><span>60 SECONDS · DRESS THE BRIEF</span><span className="game-arrow"><ArrowRight size={16} /></span></span>
+          </button>
+          <button className="game-card cat-card" type="button" onClick={onCat}>
+            <span className="game-card-top"><span className="game-icon cat-icon"><PawPrint size={18} /></span><span className="game-index">GAME 07</span></span>
+            <span className="game-card-title">Cat vs Everything</span>
+            <span className="game-card-description">One cat, nine hazards, and a very questionable cucumber.</span>
+            <span className="game-card-bottom"><span>ENDLESS SURVIVAL · COLLECT FISH</span><span className="game-arrow"><ArrowRight size={16} /></span></span>
           </button>
         </div>
         <p className="games-note">More little games will find their way here.</p>

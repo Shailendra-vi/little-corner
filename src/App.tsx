@@ -7,8 +7,9 @@ import CatchStars from './pages/CatchStars'
 import TicTacToe from './pages/TicTacToe'
 import JungleWhackAMole from './pages/JungleWhackAMole'
 import FashionDisaster from './pages/FashionDisaster'
+import CatVsEverything from './pages/CatVsEverything'
 
-type Page = 'home' | 'reaction' | 'memory' | 'stars' | 'tic-tac-toe' | 'monkeys' | 'fashion'
+type Page = 'home' | 'reaction' | 'memory' | 'stars' | 'tic-tac-toe' | 'monkeys' | 'fashion' | 'cat'
 
 const paths: Record<Page, string> = {
   home: '/',
@@ -18,6 +19,7 @@ const paths: Record<Page, string> = {
   'tic-tac-toe': '/games/tic-tac-toe',
   monkeys: '/games/whack-a-monkey',
   fashion: '/games/fashion-disaster',
+  cat: '/games/cat-vs-everything',
 }
 
 function pageFromPath(pathname: string): Page {
@@ -71,13 +73,14 @@ function App() {
 
   return (
     <div className="app-shell">
-      {page === 'home' && <Home onReaction={() => navigate('reaction')} onMemory={() => navigate('memory')} onStars={() => navigate('stars')} onTicTacToe={() => navigate('tic-tac-toe')} onMonkeys={() => navigate('monkeys')} onFashion={() => navigate('fashion')} />}
+      {page === 'home' && <Home onReaction={() => navigate('reaction')} onMemory={() => navigate('memory')} onStars={() => navigate('stars')} onTicTacToe={() => navigate('tic-tac-toe')} onMonkeys={() => navigate('monkeys')} onFashion={() => navigate('fashion')} onCat={() => navigate('cat')} />}
       {page === 'reaction' && <ReactionTime onBack={backToGames} />}
       {page === 'memory' && <MemoryCards onBack={backToGames} />}
       {page === 'stars' && <CatchStars onBack={backToGames} />}
       {page === 'tic-tac-toe' && <TicTacToe onBack={backToGames} />}
       {page === 'monkeys' && <JungleWhackAMole onBack={backToGames} />}
       {page === 'fashion' && <FashionDisaster onBack={backToGames} />}
+      {page === 'cat' && <CatVsEverything onBack={backToGames} />}
     </div>
   )
 }

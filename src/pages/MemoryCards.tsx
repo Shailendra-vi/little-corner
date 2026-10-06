@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowLeft, RotateCcw, Sparkles } from 'lucide-react'
+import GameAmbience from '../components/GameAmbience'
 
 const faces = ['✦', '◉', '⌁', '◆', '✧', '⬡', '☼', '⌘']
 type Card = { id: number; face: string }
@@ -88,6 +89,7 @@ export default function MemoryCards({ onBack }: { onBack: () => void }) {
   return (
     <main className="explore-page game-page memory-page">
       <div className="explore-glow" aria-hidden="true" />
+      <GameAmbience kind="fireworks" />
       <header className="explore-header">
         <button className="back-button" onClick={onBack} type="button"><ArrowLeft size={16} /><span>Back to games</span></button>
         <div className="brand-mark"><Sparkles size={14} /><span>PLAY / 02</span></div>
@@ -98,10 +100,11 @@ export default function MemoryCards({ onBack }: { onBack: () => void }) {
           <div className="eyebrow"><span className="memory-eyebrow-icon">✳</span> MEMORY CARDS</div>
           <h1 id="memory-title" className="game-title">Find the<br /><span>matching pairs.</span></h1>
           <p className="explore-intro">Flip two at a time. Remember what you’ve seen. Match all eight pairs to finish.</p>
+          <p className="firework-cue"><Sparkles size={15} /><span>Tap anywhere outside the cards to launch a Diwali firework</span><span className="firework-cue-pulse" aria-hidden="true" /></p>
         </motion.div>
 
         <div className="memory-layout">
-          <div className={`memory-board ${state === 'idle' ? 'board-idle' : ''}`} aria-label="Memory card board">
+          <div className={`memory-board ${state === 'idle' ? 'board-idle' : ''}`} aria-label="Memory card board" data-game-surface>
             {deck.map((card, index) => {
               const isOpen = flipped.includes(card.id) || matched.includes(card.id)
               return (

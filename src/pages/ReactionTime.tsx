@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowLeft, RotateCcw, Zap } from 'lucide-react'
+import GameAmbience from '../components/GameAmbience'
 
 type GameState = 'idle' | 'waiting' | 'go' | 'early' | 'intermission' | 'done'
 
@@ -71,10 +72,11 @@ export default function ReactionTime({ onBack }: { onBack: () => void }) {
   const tone = state === 'go' ? 'signal-go' : state === 'waiting' ? 'signal-wait' : state === 'early' ? 'signal-early' : 'signal-idle'
 
   return (
-    <main className="explore-page game-page">
+    <main className="explore-page game-page reaction-page">
       <div className="explore-glow" aria-hidden="true" />
+      <GameAmbience kind="balloons" />
       <header className="explore-header">
-        <button className="back-button" onClick={onBack} type="button"><ArrowLeft size={16} /><span>Back to explore</span></button>
+        <button className="back-button" onClick={onBack} type="button"><ArrowLeft size={16} /><span>Back to games</span></button>
         <div className="brand-mark"><Zap size={14} /><span>PLAY / 01</span></div>
       </header>
 
@@ -82,7 +84,7 @@ export default function ReactionTime({ onBack }: { onBack: () => void }) {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .4 }}>
           <div className="eyebrow"><Zap size={14} /> REACTION TIME</div>
           <h1 id="game-title" className="game-title">How quick<br /><span>are you?</span></h1>
-          <p className="explore-intro">A tiny test of timing. Three rounds, no pressure, highly unscientific.</p>
+          <p className="explore-intro">A tiny test of timing. Three rounds, no pressure, highly unscientific. Pop a balloon for a little color, or hold and drag one anywhere.</p>
         </motion.div>
 
         <div className="game-layout">

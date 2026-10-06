@@ -1,30 +1,74 @@
 import './App.css'
-import Home from './pages/Home'
 import { useEffect, useRef, useState } from 'react'
+import Home from './pages/Home'
 import ReactionTime from './pages/ReactionTime'
 import MemoryCards from './pages/MemoryCards'
+import CatchStars from './pages/CatchStars'
+
+type Page = 'home' | 'reaction' | 'memory' | 'stars'
+
+const paths: Record<Page, string> = {
+  home: '/',
+  reaction: '/games/reaction-time',
+  memory: '/games/memory-cards',
+  stars: '/games/catch-the-stars',
+}
+
+function pageFromPath(pathname: string): Page {
+  const match = (Object.keys(paths) as Page[]).find(page => paths[page] === pathname.replace(/\/$/, '') || paths[page] === pathname)
+  return match ?? 'home'
+}
 
 function App() {
-  const [page, setPage] = useState<'home' | 'reaction' | 'memory'>('home')
+  const [page, setPage] = useState<Page>(() => pageFromPath(window.location.pathname))
+  const currentPage = useRef(page)
   const returnToGames = useRef(false)
+
+  useEffect(() => {
+    if (!window.history.state?.presentPage) {
+      window.history.replaceState({ presentPage: page, internal: false }, '', window.location.href)
+    }
+    const handlePopState = () => {
+      const nextPage = pageFromPath(window.location.pathname)
+      if (currentPage.current !== 'home' && nextPage === 'home') returnToGames.current = true
+      currentPage.current = nextPage
+      setPage(nextPage)
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
 
   useEffect(() => {
     if (page === 'home' && returnToGames.current) {
       returnToGames.current = false
-      document.getElementById('games')?.scrollIntoView({ behavior: 'smooth' })
+      requestAnimationFrame(() => document.getElementById('games')?.scrollIntoView({ behavior: 'smooth' }))
     }
   }, [page])
 
+  function navigate(nextPage: Page) {
+    if (nextPage === currentPage.current) return
+    window.history.pushState({ presentPage: nextPage, internal: true }, '', paths[nextPage])
+    currentPage.current = nextPage
+    setPage(nextPage)
+  }
+
   function backToGames() {
     returnToGames.current = true
+    if (window.history.state?.internal) {
+      window.history.back()
+      return
+    }
+    window.history.replaceState({ presentPage: 'home', internal: false }, '', paths.home)
+    currentPage.current = 'home'
     setPage('home')
   }
 
   return (
     <div className="app-shell">
-      {page === 'home' && <Home onReaction={() => setPage('reaction')} onMemory={() => setPage('memory')} />}
+      {page === 'home' && <Home onReaction={() => navigate('reaction')} onMemory={() => navigate('memory')} onStars={() => navigate('stars')} />}
       {page === 'reaction' && <ReactionTime onBack={backToGames} />}
       {page === 'memory' && <MemoryCards onBack={backToGames} />}
+      {page === 'stars' && <CatchStars onBack={backToGames} />}
     </div>
   )
 }

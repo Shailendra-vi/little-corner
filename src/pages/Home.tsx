@@ -1,18 +1,31 @@
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowDown, ArrowRight, Gamepad2, Sparkles, Zap } from 'lucide-react'
+import { ArrowDown, ArrowRight, Gamepad2, Sparkles, Star, Zap } from 'lucide-react'
+import HomeScene from '../components/HomeScene'
+import { getHomeTimeTheme } from '../utils/homeTimeTheme'
 
 const userName = import.meta.env.VITE_USER_NAME || 'Friend'
 
-export default function Home({ onReaction, onMemory }: { onReaction: () => void; onMemory: () => void }) {
+export default function Home({ onReaction, onMemory, onStars }: { onReaction: () => void; onMemory: () => void; onStars: () => void }) {
+  const [timeTheme, setTimeTheme] = useState(getHomeTimeTheme)
+
+  useEffect(() => {
+    const interval = window.setInterval(() => setTimeTheme(getHomeTimeTheme()), 60_000)
+    return () => window.clearInterval(interval)
+  }, [])
+
+  const timeLabel = timeTheme === 'dawn' ? 'FIRST LIGHT' : timeTheme === 'day' ? 'AFTERNOON GLOW' : timeTheme === 'sunset' ? 'SUNSET HOURS' : 'MOONLIT HOURS'
+
   return (
-    <main className="home-experience">
+    <main className={`home-experience home-time-${timeTheme}`}>
       <div className="home-atmosphere" aria-hidden="true" />
       <header className="home-header">
         <div className="home-brand"><span className="home-brand-icon"><Sparkles size={15} /></span><span>FOR {userName.toUpperCase()}</span></div>
-        <span className="home-edition">A LITTLE SOMETHING</span>
+        <span className="home-edition">{timeLabel}</span>
       </header>
 
       <section className="home-hero" aria-labelledby="home-title">
+        <HomeScene theme={timeTheme} />
         <div className="hero-copy">
           <motion.div className="hero-kicker" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .6 }}>
             <span className="kicker-line" /> A CORNER OF THE INTERNET <span className="kicker-line" />
@@ -28,17 +41,6 @@ export default function Home({ onReaction, onMemory }: { onReaction: () => void;
           </motion.a>
         </div>
 
-        <motion.div className="artifact-scene" aria-hidden="true" initial={{ opacity: 0, scale: .88 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1, delay: .18 }}>
-          <div className="artifact-halo" />
-          <div className="artifact-orbit orbit-one"><i /></div>
-          <div className="artifact-orbit orbit-two"><i /></div>
-          <div className="artifact-orb"><span className="orb-glint" /><span className="orb-core" /></div>
-          <div className="artifact-chip chip-spark"><Sparkles size={15} /></div>
-          <div className="artifact-chip chip-dot"><span /></div>
-          <div className="artifact-ground" />
-        </motion.div>
-
-        <div className="hero-index"><span>01</span><i /> A FEW THINGS TO DISCOVER</div>
       </section>
 
       <section className="games-section" id="games" aria-labelledby="games-title">
@@ -62,6 +64,12 @@ export default function Home({ onReaction, onMemory }: { onReaction: () => void;
             <span className="game-card-title">Memory Cards</span>
             <span className="game-card-description">Find the pairs. See how many turns it takes.</span>
             <span className="game-card-bottom"><span>8 PAIRS · MATCH THEM ALL</span><span className="game-arrow"><ArrowRight size={16} /></span></span>
+          </button>
+          <button className="game-card stars-card" type="button" onClick={onStars}>
+            <span className="game-card-top"><span className="game-icon stars-icon"><Star size={17} /></span><span className="game-index">GAME 03</span></span>
+            <span className="game-card-title">Catch the Stars</span>
+            <span className="game-card-description">Move the catcher. See how many you can collect.</span>
+            <span className="game-card-bottom"><span>30 SECONDS · CATCH & COLLECT</span><span className="game-arrow"><ArrowRight size={16} /></span></span>
           </button>
         </div>
         <p className="games-note">More little games will find their way here.</p>

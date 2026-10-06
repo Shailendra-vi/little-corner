@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react'
 import type { WebGLRenderer } from 'three'
 
-export type AmbienceKind = 'balloons' | 'fireworks' | 'cosmos' | 'tic-tac-toe' | 'jungle'
+export type AmbienceKind = 'balloons' | 'fireworks' | 'cosmos' | 'tic-tac-toe' | 'jungle' | 'fashion'
+export type FashionStudioSignals = { score: number; combo: number; timeRatio: number; selection: number; distortion: number; accent: number; pulse: number }
 
 type ThreeRuntime = Pick<typeof import('three'),
   | 'WebGLRenderer' | 'Scene' | 'OrthographicCamera' | 'Group' | 'Mesh' | 'SphereGeometry'
@@ -19,12 +20,14 @@ type BeachToken = { group: InstanceType<ThreeRuntime['Group']>; hit: InstanceTyp
 type BeachBird = { group: InstanceType<ThreeRuntime['Group']>; startX: number; y: number; speed: number; phase: number }
 type BeachFish = { group: InstanceType<ThreeRuntime['Group']>; startX: number; y: number; speed: number; phase: number }
 type JungleMotion = { group: InstanceType<ThreeRuntime['Group']>; x: number; y: number; phase: number; speed: number; kind: 'monkey' | 'bird' }
+type FashionHanger = { group: InstanceType<ThreeRuntime['Group']>; phase: number; speed: number }
+type FashionFabric = { mesh: InstanceType<ThreeRuntime['Mesh']>; phase: number; amplitude: number }
 
 const balloonColors = [0xe9a0b1, 0xc5a5df, 0xf0c28d, 0xd9867f, 0xa4bfd6]
 const fireworkColors = [0xff4e54, 0xffa14e, 0xc99bff, 0xffdf75, 0x76e2ce, 0xff75b7]
 const cosmicColors = [0xffd887, 0xe49bff, 0x82dcff, 0xff8496]
 
-function mountAmbience(host: HTMLDivElement, kind: AmbienceKind, THREE: ThreeRuntime) {
+function mountAmbience(host: HTMLDivElement, kind: AmbienceKind, THREE: ThreeRuntime, fashionSignals: { current: FashionStudioSignals }) {
   let renderer: WebGLRenderer
   try {
     renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'low-power' })
@@ -43,7 +46,7 @@ function mountAmbience(host: HTMLDivElement, kind: AmbienceKind, THREE: ThreeRun
   renderer.domElement.setAttribute('aria-hidden', 'true')
   host.appendChild(renderer.domElement)
 
-  const ambienceColors = kind === 'balloons' ? [0xbda1da, 0xe8837b, 0xf0bb82] : kind === 'fireworks' ? [0xe69183, 0xd8a0de, 0xf4c276] : kind === 'tic-tac-toe' ? [0xffdb9c, 0x8de4df, 0x99caff] : kind === 'jungle' ? [0x8ee3ae, 0x57b894, 0xf0cf7c] : [0xb895e5, 0x83cce7, 0xf1a1b4]
+  const ambienceColors = kind === 'balloons' ? [0xbda1da, 0xe8837b, 0xf0bb82] : kind === 'fireworks' ? [0xe69183, 0xd8a0de, 0xf4c276] : kind === 'tic-tac-toe' ? [0xffdb9c, 0x8de4df, 0x99caff] : kind === 'jungle' ? [0x8ee3ae, 0x57b894, 0xf0cf7c] : kind === 'fashion' ? [0xd2a7df, 0xf0c38d, 0xc78b9e] : [0xb895e5, 0x83cce7, 0xf1a1b4]
   scene.add(new THREE.AmbientLight(0xffe8ed, 1.2))
   const light = new THREE.PointLight(ambienceColors[0], 24, 40)
   light.position.set(-3, 4, 8)
@@ -66,6 +69,9 @@ function mountAmbience(host: HTMLDivElement, kind: AmbienceKind, THREE: ThreeRun
   const beachBirds: BeachBird[] = []
   const beachFish: BeachFish[] = []
   const jungleActors: JungleMotion[] = []
+  const fashionHangers: FashionHanger[] = []
+  const fashionFabrics: FashionFabric[] = []
+  let fashionWarmLight: InstanceType<ThreeRuntime['PointLight']> | null = null
   const clickableObjects: InstanceType<ThreeRuntime['Mesh']>[] = []
   const replacementTimers: number[] = []
   let disposed = false
@@ -471,6 +477,93 @@ function mountAmbience(host: HTMLDivElement, kind: AmbienceKind, THREE: ThreeRun
     })
   }
 
+  const addFashionStudio = () => {
+    const matte = (color: number, roughness = .7, metalness = .12) => {
+      const next = new THREE.MeshStandardMaterial({ color, roughness, metalness })
+      sharedMaterials.push(next)
+      return next
+    }
+    const gold = matte(0xc5a875, .32, .64)
+    const rose = matte(0x9b6a70, .38, .2)
+    const fabricMats = [matte(0x986a81, .9), matte(0x8179a3, .88), matte(0xb27b63, .92), matte(0xb8a276, .84)]
+    const backdrop = new THREE.Mesh(new THREE.BoxGeometry(Math.max(viewWidth * 1.8, 32), 19, .3), new THREE.MeshBasicMaterial({ color: 0x19171d }))
+    backdrop.position.set(0, 1, -13)
+    sharedMaterials.push(backdrop.material as InstanceType<ThreeRuntime['MeshBasicMaterial']>)
+    scene.add(backdrop)
+
+    // Long reflective catwalk, framed by warm runway lights.
+    const runway = new THREE.Mesh(new THREE.BoxGeometry(Math.max(viewWidth * 1.2, 20), 2.6, .42), matte(0x302832, .26, .48))
+    runway.position.set(0, -5.15, -3.2)
+    runway.rotation.x = -.12
+    scene.add(runway)
+    const edge = new THREE.Mesh(new THREE.BoxGeometry(Math.max(viewWidth * .98, 17), .045, .46), gold)
+    edge.position.set(0, -3.86, -2.94)
+    scene.add(edge)
+    const runwaySeam = new THREE.Mesh(new THREE.BoxGeometry(.025, 2.48, .03), matte(0x9f7d70, .4, .35))
+    runwaySeam.position.set(0, -5.14, -2.91)
+    scene.add(runwaySeam)
+    for (let side of [-1, 1]) {
+      for (let index = 0; index < 5; index += 1) {
+        const lampMat = new THREE.MeshBasicMaterial({ color: index % 2 ? 0xf3d4ae : 0xc996d6, transparent: true, opacity: .64 })
+        sharedMaterials.push(lampMat)
+        const lamp = new THREE.Mesh(new THREE.SphereGeometry(.055, 9, 7), lampMat)
+        lamp.position.set(side * (viewWidth * .28 + (index % 2) * .22), -4.35 - index * .36, -2.65)
+        scene.add(lamp)
+      }
+    }
+    // A pair of large soft light cones make the scene read like a studio set.
+    for (const [x, color] of [[-4.8, 0xe9c3ca], [4.8, 0xc8b0eb]] as const) {
+      const beamMat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: .055, depthWrite: false, side: 2 })
+      sharedMaterials.push(beamMat)
+      const beam = new THREE.Mesh(new THREE.ConeGeometry(3.7, 10, 32, 1, true), beamMat)
+      beam.position.set(x * (viewWidth / 18), 1.05, -4.2)
+      beam.rotation.z = x < 0 ? -.28 : .28
+      scene.add(beam)
+    }
+    const accentLight = new THREE.PointLight(0xcaa0df, 11, 24)
+    accentLight.position.set(-4, 3.6, 3)
+    scene.add(accentLight)
+    const warmLight = new THREE.PointLight(0xf4c18f, 9, 24)
+    warmLight.position.set(4.5, 2.5, 1)
+    scene.add(warmLight)
+    fashionWarmLight = warmLight
+
+    const positions = [-.39, -.14, .16, .4].map((fraction, index) => ({ x: fraction * viewWidth, y: [-.15, .6, -.45, .25][index] }))
+    positions.forEach(({ x, y }, index) => {
+      const hanger = new THREE.Group()
+      const hangerMaterial = index % 2 ? gold : rose
+      const hook = new THREE.Mesh(new THREE.TorusGeometry(.16, .025, 7, 20, Math.PI * 1.5), hangerMaterial)
+      hook.position.set(0, .66, 0)
+      hook.rotation.z = Math.PI * .2
+      const bar = new THREE.Mesh(new THREE.BoxGeometry(1.34, .045, .04), hangerMaterial)
+      bar.position.y = .25
+      const leftArm = new THREE.Mesh(new THREE.BoxGeometry(.76, .035, .04), hangerMaterial)
+      leftArm.position.set(-.3, .44, 0); leftArm.rotation.z = -.45
+      const rightArm = new THREE.Mesh(new THREE.BoxGeometry(.76, .035, .04), hangerMaterial)
+      rightArm.position.set(.3, .44, 0); rightArm.rotation.z = .45
+      hanger.add(hook, bar, leftArm, rightArm)
+      // Sculpted, draped fabric panels keep the silhouettes graphic and elegant.
+      const cloth = new THREE.Mesh(new THREE.SphereGeometry(.58, 18, 12), fabricMats[index])
+      cloth.scale.set(1.03, 1.58, .12)
+      cloth.position.set(0, -.75, .02)
+      cloth.rotation.z = (index % 2 ? 1 : -1) * .05
+      hanger.add(cloth)
+      hanger.position.set(x, y, -1 + index * .24)
+      scene.add(hanger)
+      fashionHangers.push({ group: hanger, phase: index * 1.65, speed: .2 + index * .025 })
+    })
+
+    for (let index = 0; index < 16; index += 1) {
+      const color = index % 3 === 0 ? 0xe0b9ed : index % 3 === 1 ? 0xe8c98e : 0xd396a0
+      const material = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: .32 + Math.random() * .38 })
+      sharedMaterials.push(material)
+      const mote = new THREE.Mesh(new THREE.SphereGeometry(.018 + Math.random() * .035, 7, 6), material)
+      mote.position.set((Math.random() - .5) * viewWidth * 1.1, (Math.random() - .5) * 9, -1 + Math.random() * 2)
+      scene.add(mote)
+      fashionFabrics.push({ mesh: mote, phase: Math.random() * Math.PI * 2, amplitude: .18 + Math.random() * .42 })
+    }
+  }
+
   const addBalloon = (preferredX?: number) => {
     const group = new THREE.Group()
     const tint = balloonColors[Math.floor(Math.random() * balloonColors.length)]
@@ -520,6 +613,7 @@ function mountAmbience(host: HTMLDivElement, kind: AmbienceKind, THREE: ThreeRun
   }
   if (kind === 'fireworks') addDiwaliHome()
   if (kind === 'jungle') addJungleScene()
+  if (kind === 'fashion') addFashionStudio()
   if (kind === 'tic-tac-toe') {
     const skyMat = new THREE.MeshBasicMaterial({ color: 0x91cce8 })
     const distantWaterMat = new THREE.MeshBasicMaterial({ color: 0x329eae })
@@ -716,7 +810,7 @@ function mountAmbience(host: HTMLDivElement, kind: AmbienceKind, THREE: ThreeRun
   const isInteractiveTarget = (target: EventTarget | null) => target instanceof Element && Boolean(target.closest('button, a, input, [role="button"], [data-game-surface]'))
 
   const handlePointerMove = (event: PointerEvent) => {
-    if (kind !== 'balloons' && kind !== 'tic-tac-toe') return
+    if (kind !== 'balloons' && kind !== 'tic-tac-toe' && kind !== 'fashion') return
     eventPoint(event)
     if (draggedBalloon && dragPointerId === event.pointerId) {
       if (Math.hypot(event.clientX - dragStartClientX, event.clientY - dragStartClientY) > 7) hasDragged = true
@@ -868,9 +962,65 @@ function mountAmbience(host: HTMLDivElement, kind: AmbienceKind, THREE: ThreeRun
 
   const clock = new THREE.Clock()
   let animationFrame = 0
+  let seenFashionPulse = fashionSignals.current.pulse
+  let seenFashionDistortion = fashionSignals.current.distortion
+  let seenFashionSelection = fashionSignals.current.selection
+  let fashionPulse = 0
+  let fashionDistortion = 0
+  let fashionSelection = 0
   const render = () => {
     const delta = Math.min(clock.getDelta(), .05)
     const elapsed = clock.elapsedTime
+    if (kind === 'fashion') {
+      const signal = fashionSignals.current
+      const normalizedX = pointerActive ? THREE.MathUtils.clamp(pointerWorldX / Math.max(viewWidth / 2, 1), -1, 1) : 0
+      const normalizedY = pointerActive ? THREE.MathUtils.clamp(pointerWorldY / (viewHeight / 2), -1, 1) : 0
+      camera.position.x += (normalizedX * .48 - camera.position.x) * Math.min(1, delta * 1.15)
+      camera.position.y += (normalizedY * .3 - camera.position.y) * Math.min(1, delta * 1.9)
+      camera.rotation.z += (-normalizedX * .006 - camera.rotation.z) * Math.min(1, delta * 1.25)
+      if (signal.pulse !== seenFashionPulse) {
+        seenFashionPulse = signal.pulse
+        fashionPulse = .48
+        const accentColors = [signal.accent, 0xe7b7df, 0xf5d08e]
+        addBurst(0, -.15, 2, accentColors, 24)
+      }
+      if (signal.distortion !== seenFashionDistortion) {
+        seenFashionDistortion = signal.distortion
+        fashionDistortion = .22
+      }
+      if (signal.selection !== seenFashionSelection) {
+        seenFashionSelection = signal.selection
+        fashionSelection = .2
+      }
+      fashionPulse = Math.max(0, fashionPulse - delta * 1.5)
+      fashionDistortion = Math.max(0, fashionDistortion - delta * 2.2)
+      fashionSelection = Math.max(0, fashionSelection - delta * 1.8)
+      if (fashionDistortion > 0) {
+        camera.position.x += Math.sin(elapsed * 76) * fashionDistortion * .22
+        camera.position.y += Math.cos(elapsed * 62) * fashionDistortion * .16
+        camera.rotation.z += Math.sin(elapsed * 68) * fashionDistortion * .006
+      }
+      light.color.setHex(signal.accent || 0xd2a7df)
+      light.intensity = 20 + Math.min(signal.score, 100) * .06 + fashionPulse * 28 + fashionSelection * 9
+      if (fashionWarmLight) {
+        fashionWarmLight.color.setHex(signal.timeRatio < .2 ? 0xf08b78 : 0xf4c18f)
+        fashionWarmLight.intensity = 8 + Math.min(signal.combo, 10) * .28 + fashionPulse * 15
+      }
+      fashionHangers.forEach(({ group, phase, speed }, index) => {
+        group.rotation.y = Math.sin(elapsed * speed + phase) * .18 + normalizedX * .08
+        group.rotation.z = Math.sin(elapsed * speed * .75 + phase) * .035
+        group.position.y += (Math.sin(elapsed * .7 + phase) * .12 - (group.position.y - [-.15, .6, -.45, .25][index])) * Math.min(1, delta * 1.2)
+        if (group.children[4] && (group.children[4] as InstanceType<ThreeRuntime['Mesh']>).material instanceof THREE.MeshStandardMaterial) {
+          const clothMaterial = (group.children[4] as InstanceType<ThreeRuntime['Mesh']>).material as InstanceType<ThreeRuntime['MeshStandardMaterial']>
+          clothMaterial.color.setHex(signal.accent || [0x986a81, 0x8179a3, 0xb27b63, 0xb8a276][index])
+        }
+      })
+      fashionFabrics.forEach(({ mesh, phase, amplitude }, index) => {
+        mesh.position.y += (Math.sin(elapsed * .44 + phase) * amplitude - mesh.position.y) * Math.min(1, delta * .42)
+        mesh.position.x += Math.sin(elapsed * .24 + phase) * delta * .09
+        mesh.scale.setScalar(1 + fashionPulse * (index % 3 === 0 ? .9 : .25))
+      })
+    }
     diyaFlames.forEach(({ mesh, phase }) => {
       mesh.scale.y = .78 + (Math.sin(elapsed * 8 + phase) + 1) * .17
       mesh.rotation.z = Math.sin(elapsed * 4.2 + phase) * .09
@@ -1024,8 +1174,10 @@ function mountAmbience(host: HTMLDivElement, kind: AmbienceKind, THREE: ThreeRun
   }
 }
 
-export default function GameAmbience({ kind }: { kind: AmbienceKind }) {
+export default function GameAmbience({ kind, fashion }: { kind: AmbienceKind; fashion?: FashionStudioSignals }) {
   const hostRef = useRef<HTMLDivElement>(null)
+  const fashionRef = useRef<FashionStudioSignals>(fashion ?? { score: 0, combo: 0, timeRatio: 1, selection: 0, distortion: 0, accent: 0xd2a7df, pulse: 0 })
+  fashionRef.current = fashion ?? fashionRef.current
 
   useEffect(() => {
     let cancelled = false
@@ -1033,7 +1185,7 @@ export default function GameAmbience({ kind }: { kind: AmbienceKind }) {
     void import('three').then(module => {
       if (cancelled || !hostRef.current) return
       const { WebGLRenderer, Scene, OrthographicCamera, Group, Mesh, SphereGeometry, ConeGeometry, CylinderGeometry, BoxGeometry, CircleGeometry, TorusGeometry, MeshStandardMaterial, MeshBasicMaterial, AmbientLight, PointLight, Vector2, Vector3, Raycaster, Clock, AdditiveBlending, MathUtils } = module
-      cleanup = mountAmbience(hostRef.current, kind, { WebGLRenderer, Scene, OrthographicCamera, Group, Mesh, SphereGeometry, ConeGeometry, CylinderGeometry, BoxGeometry, CircleGeometry, TorusGeometry, MeshStandardMaterial, MeshBasicMaterial, AmbientLight, PointLight, Vector2, Vector3, Raycaster, Clock, AdditiveBlending, MathUtils })
+      cleanup = mountAmbience(hostRef.current, kind, { WebGLRenderer, Scene, OrthographicCamera, Group, Mesh, SphereGeometry, ConeGeometry, CylinderGeometry, BoxGeometry, CircleGeometry, TorusGeometry, MeshStandardMaterial, MeshBasicMaterial, AmbientLight, PointLight, Vector2, Vector3, Raycaster, Clock, AdditiveBlending, MathUtils }, fashionRef)
     }).catch(() => undefined)
     return () => {
       cancelled = true

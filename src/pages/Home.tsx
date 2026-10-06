@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowDown, ArrowRight, CircleDot, Gamepad2, Leaf, Sparkles, Star, Zap } from 'lucide-react'
+import { ArrowDown, ArrowRight, CircleDot, Gamepad2, Gem, Leaf, Sparkles, Star, Zap } from 'lucide-react'
 import HomeScene from '../components/HomeScene'
 import { getHomeTimeTheme } from '../utils/homeTimeTheme'
 
 const userName = import.meta.env.VITE_USER_NAME || 'Friend'
 
-export default function Home({ onReaction, onMemory, onStars, onTicTacToe, onMonkeys }: { onReaction: () => void; onMemory: () => void; onStars: () => void; onTicTacToe: () => void; onMonkeys: () => void }) {
+export default function Home({ onReaction, onMemory, onStars, onTicTacToe, onMonkeys, onFashion }: { onReaction: () => void; onMemory: () => void; onStars: () => void; onTicTacToe: () => void; onMonkeys: () => void; onFashion: () => void }) {
   const [timeTheme, setTimeTheme] = useState(getHomeTimeTheme)
 
   useEffect(() => {
@@ -82,6 +82,12 @@ export default function Home({ onReaction, onMemory, onStars, onTicTacToe, onMon
             <span className="game-card-title">Whack-a-Monkey</span>
             <span className="game-card-description">Catch the cheeky monkeys before they duck away.</span>
             <span className="game-card-bottom"><span>30 SECONDS · QUICK HANDS</span><span className="game-arrow"><ArrowRight size={16} /></span></span>
+          </button>
+          <button className="game-card fashion-card" type="button" onClick={onFashion}>
+            <span className="game-card-top"><span className="game-icon fashion-icon"><Gem size={18} /></span><span className="game-index">GAME 06</span></span>
+            <span className="game-card-title">Fashion Disaster</span>
+            <span className="game-card-description">Catch the right pieces. Style the event. Face the verdict.</span>
+            <span className="game-card-bottom"><span>60 SECONDS · DRESS THE BRIEF</span><span className="game-arrow"><ArrowRight size={16} /></span></span>
           </button>
         </div>
         <p className="games-note">More little games will find their way here.</p>

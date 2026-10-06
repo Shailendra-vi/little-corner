@@ -8,8 +8,9 @@ import TicTacToe from './pages/TicTacToe'
 import JungleWhackAMole from './pages/JungleWhackAMole'
 import FashionDisaster from './pages/FashionDisaster'
 import CatVsEverything from './pages/CatVsEverything'
+import HillClimbChaos from './pages/HillClimbChaos'
 
-type Page = 'home' | 'reaction' | 'memory' | 'stars' | 'tic-tac-toe' | 'monkeys' | 'fashion' | 'cat'
+type Page = 'home' | 'reaction' | 'memory' | 'stars' | 'tic-tac-toe' | 'monkeys' | 'fashion' | 'cat' | 'hill-climb'
 
 const paths: Record<Page, string> = {
   home: '/',
@@ -20,6 +21,7 @@ const paths: Record<Page, string> = {
   monkeys: '/games/whack-a-monkey',
   fashion: '/games/fashion-disaster',
   cat: '/games/cat-vs-everything',
+  'hill-climb': '/games/hill-climb-chaos',
 }
 
 function pageFromPath(pathname: string): Page {
@@ -73,7 +75,7 @@ function App() {
 
   return (
     <div className="app-shell">
-      {page === 'home' && <Home onReaction={() => navigate('reaction')} onMemory={() => navigate('memory')} onStars={() => navigate('stars')} onTicTacToe={() => navigate('tic-tac-toe')} onMonkeys={() => navigate('monkeys')} onFashion={() => navigate('fashion')} onCat={() => navigate('cat')} />}
+      {page === 'home' && <Home onReaction={() => navigate('reaction')} onMemory={() => navigate('memory')} onStars={() => navigate('stars')} onTicTacToe={() => navigate('tic-tac-toe')} onMonkeys={() => navigate('monkeys')} onFashion={() => navigate('fashion')} onCat={() => navigate('cat')} onHillClimb={() => navigate('hill-climb')} />}
       {page === 'reaction' && <ReactionTime onBack={backToGames} />}
       {page === 'memory' && <MemoryCards onBack={backToGames} />}
       {page === 'stars' && <CatchStars onBack={backToGames} />}
@@ -81,6 +83,7 @@ function App() {
       {page === 'monkeys' && <JungleWhackAMole onBack={backToGames} />}
       {page === 'fashion' && <FashionDisaster onBack={backToGames} />}
       {page === 'cat' && <CatVsEverything onBack={backToGames} />}
+      {page === 'hill-climb' && <HillClimbChaos onBack={backToGames} />}
     </div>
   )
 }

@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowDown, ArrowRight, CircleDot, Gamepad2, Gem, Leaf, PawPrint, Sparkles, Star, Zap } from 'lucide-react'
+import { ArrowDown, ArrowRight, CircleDot, Gamepad2, Gem, Leaf, PawPrint, Sparkles, Star, Zap, Gauge } from 'lucide-react'
 import HomeScene from '../components/HomeScene'
 import { getHomeTimeTheme } from '../utils/homeTimeTheme'
 
 const userName = import.meta.env.VITE_USER_NAME || 'Friend'
 
-export default function Home({ onReaction, onMemory, onStars, onTicTacToe, onMonkeys, onFashion, onCat }: { onReaction: () => void; onMemory: () => void; onStars: () => void; onTicTacToe: () => void; onMonkeys: () => void; onFashion: () => void; onCat: () => void }) {
+export default function Home({ onReaction, onMemory, onStars, onTicTacToe, onMonkeys, onFashion, onCat, onHillClimb }: { onReaction: () => void; onMemory: () => void; onStars: () => void; onTicTacToe: () => void; onMonkeys: () => void; onFashion: () => void; onCat: () => void; onHillClimb: () => void }) {
   const [timeTheme, setTimeTheme] = useState(getHomeTimeTheme)
 
   useEffect(() => {
@@ -94,6 +94,12 @@ export default function Home({ onReaction, onMemory, onStars, onTicTacToe, onMon
             <span className="game-card-title">Cat vs Everything</span>
             <span className="game-card-description">One cat, nine hazards, and a very questionable cucumber.</span>
             <span className="game-card-bottom"><span>ENDLESS SURVIVAL · COLLECT FISH</span><span className="game-arrow"><ArrowRight size={16} /></span></span>
+          </button>
+          <button className="game-card hill-card" type="button" onClick={onHillClimb}>
+            <span className="game-card-top"><span className="game-icon hill-icon"><Gauge size={18} /></span><span className="game-index">GAME 08</span></span>
+            <span className="game-card-title">Hill Climb: Chaos Edition</span>
+            <span className="game-card-description">Steep roads, ridiculous rides, and very questionable landings.</span>
+            <span className="game-card-bottom"><span>ENDLESS DRIVE · COLLECT & UPGRADE</span><span className="game-arrow"><ArrowRight size={16} /></span></span>
           </button>
         </div>
         <p className="games-note">More little games will find their way here.</p>

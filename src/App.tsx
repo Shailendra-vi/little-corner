@@ -1,17 +1,30 @@
 import './App.css'
 import Home from './pages/Home'
-import Explore from './pages/Explore'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import ReactionTime from './pages/ReactionTime'
+import MemoryCards from './pages/MemoryCards'
 
 function App() {
-  const [page, setPage] = useState<'home' | 'explore' | 'reaction'>('home')
+  const [page, setPage] = useState<'home' | 'reaction' | 'memory'>('home')
+  const returnToGames = useRef(false)
+
+  useEffect(() => {
+    if (page === 'home' && returnToGames.current) {
+      returnToGames.current = false
+      document.getElementById('games')?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [page])
+
+  function backToGames() {
+    returnToGames.current = true
+    setPage('home')
+  }
 
   return (
     <div className="app-shell">
-      {page === 'home' && <Home onExplore={() => setPage('explore')} />}
-      {page === 'explore' && <Explore onHome={() => setPage('home')} onPlay={() => setPage('reaction')} />}
-      {page === 'reaction' && <ReactionTime onBack={() => setPage('explore')} />}
+      {page === 'home' && <Home onReaction={() => setPage('reaction')} onMemory={() => setPage('memory')} />}
+      {page === 'reaction' && <ReactionTime onBack={backToGames} />}
+      {page === 'memory' && <MemoryCards onBack={backToGames} />}
     </div>
   )
 }
